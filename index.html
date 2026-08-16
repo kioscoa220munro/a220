@@ -786,7 +786,8 @@
         <!-- ===== SYNC ===== -->
         <section id="sync" class="v">
             <h2><i class="fas fa-sync"></i> Sincronizar</h2>
-            <div class="panel"><h3><i class="fas fa-github"></i> Configuración</h3>
+            <div class="panel">
+                <h3><i class="fas fa-github"></i> Configuración</h3>
                 <div class="fg">
                     <div><label>Usuario GitHub</label><input id="githubUser" placeholder="tu-usuario" value="kioscoa220munro"></div>
                     <div><label>Repositorio</label><input id="githubRepo" placeholder="a220-data" value="a220-data"></div>
@@ -794,12 +795,15 @@
                 </div>
                 <button class="btn btn-p" onclick="saveGitHubConfig()"><i class="fas fa-save"></i> Guardar</button>
             </div>
-            <div class="panel"><h3><i class="fas fa-arrows-rotate"></i> Acciones</h3>
+            <div class="panel">
+                <h3><i class="fas fa-arrows-rotate"></i> Acciones</h3>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
                     <button class="btn btn-s" onclick="syncToGitHub()"><i class="fas fa-upload"></i> Subir</button>
                     <button class="btn btn-i" onclick="syncFromGitHub()"><i class="fas fa-download"></i> Descargar</button>
                 </div>
-                <div id="syncLog" style="margin-top:12px;font-size:12px;color:var(--l);border-top:1px solid var(--e);padding-top:10px;max-height:150px;overflow-y:auto;"><div>📡 Configurá GitHub</div></div>
+                <div id="syncLog" style="margin-top:12px;font-size:12px;color:var(--l);border-top:1px solid var(--e);padding-top:10px;max-height:150px;overflow-y:auto;">
+                    <div>📡 Configurá GitHub</div>
+                </div>
             </div>
         </section>
 
@@ -807,7 +811,7 @@
 
     <script>
         // ============================================
-        // CONTRASEÑA (en el código)
+        // CONTRASEÑA
         // ============================================
         const PASSWORD = 'Lujoci10$$$';
         let isLoggedIn = false;
@@ -873,19 +877,19 @@
             return {
                 products: [
                     { id: 1, name: 'Agua 500 ml', cat: 'Bebidas', price: 1200, stock: 24, minStock: 3,
-                    barcode: '7791234567890', image: '' },
+                        barcode: '7791234567890', image: '' },
                     { id: 2, name: 'Gaseosa', cat: 'Bebidas', price: 1800, stock: 18, minStock: 3,
-                    barcode: '7791234567891', image: '' },
+                        barcode: '7791234567891', image: '' },
                     { id: 3, name: 'Yerba 500g', cat: 'Almacén', price: 3500, stock: 10, minStock: 3,
-                    barcode: '7791234567892', image: '' },
+                        barcode: '7791234567892', image: '' },
                     { id: 4, name: 'Alfajor', cat: 'Golosinas', price: 1300, stock: 20, minStock: 3,
-                    barcode: '7791234567893', image: '' },
+                        barcode: '7791234567893', image: '' },
                     { id: 5, name: 'Papas snack', cat: 'Snacks', price: 1700, stock: 15, minStock: 3,
-                    barcode: '7791234567894', image: '' },
+                        barcode: '7791234567894', image: '' },
                     { id: 6, name: 'Cigarrillos', cat: 'Tabaco', price: 4000, stock: 10, minStock: 3,
-                    barcode: '7791234567895', image: '' },
+                        barcode: '7791234567895', image: '' },
                     { id: 7, name: 'Helado palito', cat: 'Helados', price: 1800, stock: 12, minStock: 3,
-                    barcode: '7791234567896', image: '' }
+                        barcode: '7791234567896', image: '' }
                 ],
                 sales: [],
                 moves: [],
@@ -987,21 +991,14 @@
             const total = todays.reduce((a, s) => a + (s.total || 0), 0);
             const units = todays.reduce((a, s) => a + (s.items ? s.items.reduce((b, i) => b + (i.qty || 0), 0) : 0), 0);
 
-            const dV = document.getElementById('dVentas');
-            const dP = document.getElementById('dProductos');
-            const dB = document.getElementById('dBajo');
-            const dU = document.getElementById('dUnidades');
-            if (dV) dV.textContent = money(total);
-            if (dP) dP.textContent = data.products.length;
-            if (dB) dB.textContent = data.products.filter(p => p.stock <= p.minStock).length;
-            if (dU) dU.textContent = units;
+            document.getElementById('dVentas').textContent = money(total);
+            document.getElementById('dProductos').textContent = data.products.length;
+            document.getElementById('dBajo').textContent = data.products.filter(p => p.stock <= p.minStock).length;
+            document.getElementById('dUnidades').textContent = units;
 
             const low = data.products.filter(p => p.stock <= p.minStock);
-            const alertas = document.getElementById('alertas');
-            if (alertas) {
-                alertas.innerHTML = low.length ? low.map(p => '<div class="sl">⚠️ ' + p.name + ': ' + p.stock +
-                    ' uds</div>').join('') : 'Sin alertas.';
-            }
+            document.getElementById('alertas').innerHTML = low.length ? low.map(p => '<div class="sl">⚠️ ' + p.name +
+                ': ' + p.stock + ' uds</div>').join('') : 'Sin alertas.';
 
             const catSales = {};
             data.sales.forEach(s => {
@@ -1014,12 +1011,9 @@
                 }
             });
             const sorted = Object.entries(catSales).sort((a, b) => b[1] - a[1]);
-            const cs = document.getElementById('categorySummary');
-            if (cs) {
-                cs.innerHTML = sorted.length ? sorted.map(([cat, total]) =>
-                    '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--e);"><span>' +
-                    cat + '</span> <strong>' + money(total) + '</strong></div>').join('') : 'Sin ventas.';
-            }
+            document.getElementById('categorySummary').innerHTML = sorted.length ? sorted.map(([cat, total]) =>
+                '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--e);"><span>' +
+                cat + '</span> <strong>' + money(total) + '</strong></div>').join('') : 'Sin ventas.';
         }
 
         // ============================================
@@ -1074,29 +1068,19 @@
             if (!preview) return;
 
             if (p) {
-                const nameEl = document.getElementById('previewName');
-                const priceEl = document.getElementById('previewPrice');
+                document.getElementById('previewName').textContent = p.name;
+                document.getElementById('previewPrice').textContent = money(p.price);
                 const stockEl = document.getElementById('previewStock');
+                stockEl.textContent = 'Stock: ' + p.stock;
+                stockEl.className = 'st' + (p.stock <= p.minStock ? ' low' : '');
                 const imgEl = document.getElementById('productImage');
-                if (nameEl) nameEl.textContent = p.name;
-                if (priceEl) priceEl.textContent = money(p.price);
-                if (stockEl) {
-                    stockEl.textContent = 'Stock: ' + p.stock;
-                    stockEl.className = 'st' + (p.stock <= p.minStock ? ' low' : '');
-                }
-                if (imgEl) {
-                    if (p.image) { imgEl.innerHTML = '<img src="' + p.image + '">'; } else { imgEl.innerHTML =
-                            '<i class="fas fa-cube"></i>'; }
-                }
+                if (p.image) { imgEl.innerHTML = '<img src="' + p.image + '">'; } else { imgEl.innerHTML =
+                        '<i class="fas fa-cube"></i>'; }
             } else {
-                const nameEl = document.getElementById('previewName');
-                const priceEl = document.getElementById('previewPrice');
-                const stockEl = document.getElementById('previewStock');
-                const imgEl = document.getElementById('productImage');
-                if (nameEl) nameEl.textContent = 'Seleccioná un producto';
-                if (priceEl) priceEl.textContent = '$0';
-                if (stockEl) stockEl.textContent = 'Stock: 0';
-                if (imgEl) imgEl.innerHTML = '<i class="fas fa-cube"></i>';
+                document.getElementById('previewName').textContent = 'Seleccioná un producto';
+                document.getElementById('previewPrice').textContent = '$0';
+                document.getElementById('previewStock').textContent = 'Stock: 0';
+                document.getElementById('productImage').innerHTML = '<i class="fas fa-cube"></i>';
             }
         }
 
@@ -1110,10 +1094,8 @@
         // ============================================
         function adjustQty(delta) {
             currentQty = Math.max(1, currentQty + delta);
-            const display = document.getElementById('qtyDisplay');
-            const input = document.getElementById('saleQty');
-            if (display) display.textContent = currentQty;
-            if (input) input.value = currentQty;
+            document.getElementById('qtyDisplay').textContent = currentQty;
+            document.getElementById('saleQty').value = currentQty;
         }
 
         // ============================================
@@ -1218,10 +1200,8 @@
             showToast(qty + 'x ' + p.name + ' agregado', 'success');
             playBeep();
             currentQty = 1;
-            const display = document.getElementById('qtyDisplay');
-            const input = document.getElementById('saleQty');
-            if (display) display.textContent = '1';
-            if (input) input.value = '1';
+            document.getElementById('qtyDisplay').textContent = '1';
+            document.getElementById('saleQty').value = '1';
         }
 
         function renderCart() {
@@ -1234,8 +1214,7 @@
                 ')"><i class="fas fa-times"></i></button></td></tr>'
             ).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--l);">Carrito vacío</td></tr>';
 
-            const totalEl = document.getElementById('cartTotal');
-            if (totalEl) totalEl.textContent = money(cart.reduce((a, i) => a + i.total, 0));
+            document.getElementById('cartTotal').textContent = money(cart.reduce((a, i) => a + i.total, 0));
         }
 
         function removeFromCart(index) {
@@ -1348,15 +1327,12 @@
 
                 const product = data.products.find(p => p.barcode === code);
                 if (product) {
-                    const sel = document.getElementById('saleProduct');
-                    if (sel) sel.value = product.id;
+                    document.getElementById('saleProduct').value = product.id;
                     updatePreview();
                     setPrice();
                     currentQty = 1;
-                    const display = document.getElementById('qtyDisplay');
-                    const input = document.getElementById('saleQty');
-                    if (display) display.textContent = '1';
-                    if (input) input.value = '1';
+                    document.getElementById('qtyDisplay').textContent = '1';
+                    document.getElementById('saleQty').value = '1';
 
                     const qty = 1;
                     if (product.stock >= qty) {
@@ -1413,7 +1389,7 @@
         }
 
         // ============================================
-        // GITHUB SYNC
+        // GITHUB SYNC (CORREGIDO)
         // ============================================
         let githubConfig = { user: '', repo: '', token: '' };
 
@@ -1422,29 +1398,33 @@
             if (saved) {
                 try {
                     githubConfig = JSON.parse(saved);
-                    const gu = document.getElementById('githubUser');
-                    const gr = document.getElementById('githubRepo');
-                    const gt = document.getElementById('githubToken');
-                    if (gu) gu.value = githubConfig.user || '';
-                    if (gr) gr.value = githubConfig.repo || '';
-                    if (gt) gt.value = githubConfig.token || '';
+                    document.getElementById('githubUser').value = githubConfig.user || '';
+                    document.getElementById('githubRepo').value = githubConfig.repo || '';
+                    document.getElementById('githubToken').value = githubConfig.token || '';
                 } catch (e) {}
             }
         }
 
         function saveGitHubConfig() {
-            const gu = document.getElementById('githubUser');
-            const gr = document.getElementById('githubRepo');
-            const gt = document.getElementById('githubToken');
-            githubConfig.user = gu ? gu.value.trim() : '';
-            githubConfig.repo = gr ? gr.value.trim() : '';
-            githubConfig.token = gt ? gt.value.trim() : '';
+            githubConfig.user = document.getElementById('githubUser').value.trim();
+            githubConfig.repo = document.getElementById('githubRepo').value.trim();
+            githubConfig.token = document.getElementById('githubToken').value.trim();
             if (!githubConfig.user || !githubConfig.repo || !githubConfig.token) {
                 showToast('⚠️ Completá todos los campos', 'error');
                 return;
             }
             localStorage.setItem('a220_github_config', JSON.stringify(githubConfig));
             showToast('✅ Configuración guardada', 'success');
+            addSyncLog('✅ Configuración guardada');
+        }
+
+        function addSyncLog(msg) {
+            const log = document.getElementById('syncLog');
+            if (!log) return;
+            const div = document.createElement('div');
+            div.textContent = '🕐 ' + new Date().toLocaleTimeString() + ' - ' + msg;
+            log.prepend(div);
+            if (log.children.length > 20) log.removeChild(log.lastChild);
         }
 
         async function syncToGitHub() {
@@ -1453,33 +1433,54 @@
                 return;
             }
 
-            const url = 'https://api.github.com/repos/' + githubConfig.user + '/' + githubConfig.repo +
-                '/contents/a220_data.json';
+            const url =
+                `https://api.github.com/repos/${githubConfig.user}/${githubConfig.repo}/contents/a220_data.json`;
             const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
 
             try {
                 showToast('📤 Subiendo a GitHub...', 'info');
+                addSyncLog('📤 Subiendo...');
+
                 let sha = null;
                 try {
-                    const r = await fetch(url, { headers: { 'Authorization': 'token ' + githubConfig.token } });
-                    if (r.ok) { const d = await r.json();
-                        sha = d.sha; }
+                    const r = await fetch(url, {
+                        headers: { 'Authorization': `token ${githubConfig.token}` }
+                    });
+                    if (r.ok) {
+                        const d = await r.json();
+                        sha = d.sha;
+                    }
                 } catch (e) {}
 
-                const body = { message: 'Actualización A220 - ' + new Date().toLocaleString(), content: content,
-                    branch: 'main' };
+                const body = {
+                    message: `Actualización A220 - ${new Date().toLocaleString()}`,
+                    content: content,
+                    branch: 'main'
+                };
                 if (sha) body.sha = sha;
 
                 const res = await fetch(url, {
                     method: 'PUT',
-                    headers: { 'Authorization': 'token ' + githubConfig.token,
-                        'Content-Type': 'application/json' },
+                    headers: {
+                        'Authorization': `token ${githubConfig.token}`,
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify(body)
                 });
 
-                if (res.ok) { showToast('✅ Datos subidos a GitHub', 'success');
-                    playBeep(); } else { showToast('❌ Error al subir', 'error'); }
-            } catch (e) { showToast('❌ Error: ' + e.message, 'error'); }
+                if (res.ok) {
+                    showToast('✅ Datos subidos a GitHub', 'success');
+                    addSyncLog('✅ Datos subidos correctamente');
+                    playBeep();
+                } else {
+                    const error = await res.json();
+                    showToast('❌ Error al subir: ' + (error.message || 'Error desconocido'), 'error');
+                    addSyncLog('❌ Error: ' + (error.message || 'Error desconocido'));
+                }
+            } catch (e) {
+                showToast('❌ Error: ' + e.message, 'error');
+                addSyncLog('❌ Error: ' + e.message);
+            }
         }
 
         async function syncFromGitHub() {
@@ -1488,29 +1489,44 @@
                 return;
             }
 
-            const url = 'https://api.github.com/repos/' + githubConfig.user + '/' + githubConfig.repo +
-                '/contents/a220_data.json';
+            const url =
+                `https://api.github.com/repos/${githubConfig.user}/${githubConfig.repo}/contents/a220_data.json`;
 
             try {
                 showToast('📥 Descargando desde GitHub...', 'info');
-                const res = await fetch(url, { headers: { 'Authorization': 'token ' + githubConfig.token } });
+                addSyncLog('📥 Descargando...');
+
+                const res = await fetch(url, {
+                    headers: { 'Authorization': `token ${githubConfig.token}` }
+                });
 
                 if (res.ok) {
                     const file = await res.json();
                     const content = decodeURIComponent(escape(atob(file.content)));
                     const downloaded = JSON.parse(content);
+
                     if (downloaded.products) {
                         data = downloaded;
                         save();
-                        showToast('✅ Datos descargados', 'success');
+                        showToast('✅ Datos descargados de GitHub', 'success');
+                        addSyncLog('✅ Datos descargados correctamente');
                         playBeep();
+                    } else {
+                        showToast('⚠️ El archivo no tiene datos válidos', 'error');
+                        addSyncLog('⚠️ Datos inválidos');
                     }
                 } else if (res.status === 404) {
                     showToast('⚠️ No hay datos en GitHub. Subí primero.', 'error');
+                    addSyncLog('⚠️ No hay datos en GitHub');
                 } else {
-                    showToast('❌ Error al descargar', 'error');
+                    const error = await res.json();
+                    showToast('❌ Error al descargar: ' + (error.message || 'Error desconocido'), 'error');
+                    addSyncLog('❌ Error: ' + (error.message || 'Error desconocido'));
                 }
-            } catch (e) { showToast('❌ Error: ' + e.message, 'error'); }
+            } catch (e) {
+                showToast('❌ Error: ' + e.message, 'error');
+                addSyncLog('❌ Error: ' + e.message);
+            }
         }
 
         // ============================================
@@ -1543,6 +1559,5 @@
         console.log('🔑 Contraseña: Lujoci10$$$');
         console.log('📱 URL:', window.location.href);
     </script>
-
 </body>
 </html>
