@@ -270,37 +270,7 @@ const PASSWORD = 'Lujoci10$$$';
 let isLoggedIn = false;
 
 // ============================================
-// LOGIN
-// ============================================
-function doLogin() {
-  const pass = document.getElementById('loginPass').value.trim();
-  const error = document.getElementById('loginError');
-  
-  if (!pass) {
-    error.textContent = 'Ingresá la contraseña';
-    return;
-  }
-  
-  if (pass === PASSWORD) {
-    isLoggedIn = true;
-    document.getElementById('L').classList.add('hidden');
-    loadData();
-    renderAll();
-    showToast('✅ ¡Bienvenido!', 'success');
-  } else {
-    error.textContent = '❌ Contraseña incorrecta';
-    document.getElementById('loginPass').value = '';
-  }
-}
-
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && !document.getElementById('L').classList.contains('hidden')) {
-    doLogin();
-  }
-});
-
-// ============================================
-// TEMA OSCURO
+// TEMA OSCURO (CORREGIDO)
 // ============================================
 let darkMode = localStorage.getItem('a220_theme') === 'dark';
 
@@ -308,15 +278,21 @@ function toggleTheme() {
   darkMode = !darkMode;
   localStorage.setItem('a220_theme', darkMode ? 'dark' : 'light');
   document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
-  document.querySelector('.theme-toggle i').className = darkMode ? 'fas fa-sun' : 'fas fa-moon';
+  const icon = document.querySelector('.theme-toggle i');
+  if (icon) {
+    icon.className = darkMode ? 'fas fa-sun' : 'fas fa-moon';
+  }
 }
-toggleTheme();
+
+// Aplicar tema al cargar
+document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
 
 // ============================================
 // TOAST
 // ============================================
 function showToast(msg, type) {
   const c = document.getElementById('toastContainer');
+  if (!c) return;
   const icons = {success:'fa-check-circle', error:'fa-exclamation-circle', info:'fa-info-circle'};
   const t = document.createElement('div');
   t.className = 'toast ' + (type || 'info');
@@ -351,19 +327,6 @@ let data = { products: [], sales: [], moves: [], scans: [] };
 let cart = [];
 let currentQty = 1;
 
-function loadData() {
-  const saved = localStorage.getItem(KEY);
-  if (saved) {
-    try { data = JSON.parse(saved); } catch(e) { data = getDefaultData(); }
-  } else {
-    data = getDefaultData();
-  }
-  if (!data.products) data.products = [];
-  if (!data.sales) data.sales = [];
-  if (!data.moves) data.moves = [];
-  if (!data.scans) data.scans = [];
-}
-
 function getDefaultData() {
   return {
     products: [
@@ -381,9 +344,31 @@ function getDefaultData() {
   };
 }
 
+function loadData() {
+  try {
+    const saved = localStorage.getItem(KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      data = parsed;
+      if (!data.products) data.products = [];
+      if (!data.sales) data.sales = [];
+      if (!data.moves) data.moves = [];
+      if (!data.scans) data.scans = [];
+    } else {
+      data = getDefaultData();
+    }
+  } catch(e) {
+    data = getDefaultData();
+  }
+}
+
 function save() {
-  localStorage.setItem(KEY, JSON.stringify(data));
-  renderAll();
+  try {
+    localStorage.setItem(KEY, JSON.stringify(data));
+    renderAll();
+  } catch(e) {
+    showToast('❌ Error al guardar: ' + e.message, 'error');
+  }
 }
 
 // ============================================
@@ -402,53 +387,101 @@ function dateTimeStr() {
 }
 
 // ============================================
+// LOGIN
+// ============================================
+function doLogin() {
+  const pass = document.getElementById('loginPass').value.trim();
+  const error = document.getElementById('loginError');
+  
+  if (!pass) {
+    error.textContent = 'Ingresá la contraseña';
+    return;
+  }
+  
+  if (pass === PASSWORD) {
+    isLoggedIn = true;
+    document.getElementById('L').classList.add('hidden');
+    loadData();
+    renderAll();
+    showToast('✅ ¡Bienvenido!', 'success');
+  } else {
+    error.textContent = '❌ Contraseña incorrecta';
+    document.getElementById('loginPass').value = '';
+  }
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' && !document.getElementById('L').classList.contains('hidden')) {
+    doLogin();
+  }
+});
+
+// ============================================
 // NAVEGACIÓN
 // ============================================
 function showView(id, btn) {
   document.querySelectorAll('.v').forEach(x => x.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
   document.querySelectorAll('nav button').forEach(x => x.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  renderAll();
+  if (isLoggedIn) renderAll();
 }
 
 // ============================================
 // DASHBOARD
 // ============================================
 function renderDashboard() {
+  if (!data || !data.products) return;
   const today = todayStr();
-  const todays = data.sales.filter(s => s.date.startsWith(today));
-  const total = todays.reduce((a, s) => a + s.total, 0);
-  const units = todays.reduce((a, s) => a + s.items.reduce((b, i) => b + i.qty, 0), 0);
+  const todays = data.sales.filter(s => s.date && s.date.startsWith(today));
+  const total = todays.reduce((a, s) => a + (s.total || 0), 0);
+  const units = todays.reduce((a, s) => a + (s.items ? s.items.reduce((b, i) => b + (i.qty || 0), 0) : 0), 0);
   
-  document.getElementById('dVentas').textContent = money(total);
-  document.getElementById('dProductos').textContent = data.products.length;
-  document.getElementById('dBajo').textContent = data.products.filter(p => p.stock <= p.minStock).length;
-  document.getElementById('dUnidades').textContent = units;
+  const dV = document.getElementById('dVentas');
+  const dP = document.getElementById('dProductos');
+  const dB = document.getElementById('dBajo');
+  const dU = document.getElementById('dUnidades');
+  if (dV) dV.textContent = money(total);
+  if (dP) dP.textContent = data.products.length;
+  if (dB) dB.textContent = data.products.filter(p => p.stock <= p.minStock).length;
+  if (dU) dU.textContent = units;
   
   const low = data.products.filter(p => p.stock <= p.minStock);
-  document.getElementById('alertas').innerHTML = low.length ? low.map(p => '<div class="sl">⚠️ ' + p.name + ': ' + p.stock + ' uds</div>').join('') : 'Sin alertas.';
+  const alertas = document.getElementById('alertas');
+  if (alertas) {
+    alertas.innerHTML = low.length ? low.map(p => '<div class="sl">⚠️ ' + p.name + ': ' + p.stock + ' uds</div>').join('') : 'Sin alertas.';
+  }
   
   const catSales = {};
   data.sales.forEach(s => {
-    s.items.forEach(i => {
-      const p = data.products.find(x => x.id === i.id);
-      const cat = p ? p.cat : 'Otros';
-      catSales[cat] = (catSales[cat] || 0) + i.total;
-    });
+    if (s.items) {
+      s.items.forEach(i => {
+        const p = data.products.find(x => x.id === i.id);
+        const cat = p ? p.cat : 'Otros';
+        catSales[cat] = (catSales[cat] || 0) + (i.total || 0);
+      });
+    }
   });
   const sorted = Object.entries(catSales).sort((a,b) => b[1] - a[1]);
-  document.getElementById('categorySummary').innerHTML = sorted.length ? sorted.map(([cat,total]) => '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--e);"><span>' + cat + '</span> <strong>' + money(total) + '</strong></div>').join('') : 'Sin ventas.';
+  const cs = document.getElementById('categorySummary');
+  if (cs) {
+    cs.innerHTML = sorted.length ? sorted.map(([cat,total]) => '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--e);"><span>' + cat + '</span> <strong>' + money(total) + '</strong></div>').join('') : 'Sin ventas.';
+  }
 }
 
 // ============================================
 // PRODUCTOS
 // ============================================
 function renderProducts() {
-  const search = document.getElementById('productSearch').value.toLowerCase().trim();
-  const filtered = data.products.filter(p => p.name.toLowerCase().includes(search) || (p.barcode && p.barcode.includes(search)));
+  if (!data || !data.products) return;
+  const search = document.getElementById('productSearch');
+  const searchVal = search ? search.value.toLowerCase().trim() : '';
+  const filtered = data.products.filter(p => p.name.toLowerCase().includes(searchVal) || (p.barcode && p.barcode.includes(searchVal)));
   
-  document.getElementById('productTable').innerHTML = filtered.map(p => 
+  const table = document.getElementById('productTable');
+  if (!table) return;
+  table.innerHTML = filtered.map(p => 
     '<tr><td><strong>' + p.name + '</strong></td><td><span class="bdg bdg-i">' + p.cat + '</span></td><td>' + money(p.price) + '</td><td class="' + (p.stock <= p.minStock ? 'sl' : 'so') + '">' + p.stock + '</td><td><span class="bb">' + (p.barcode || '—') + '</span></td><td>' + (p.image ? '<img src="' + p.image + '" style="width:40px;height:40px;object-fit:cover;border-radius:4px;">' : '—') + '</td><td><button class="btn btn-a btn-xs" onclick="quickSell(' + p.id + ')"><i class="fas fa-cart-plus"></i></button><button class="btn btn-p btn-xs" onclick="editProduct(' + p.id + ')"><i class="fas fa-edit"></i></button><button class="btn btn-d btn-xs" onclick="deleteProduct(' + p.id + ')"><i class="fas fa-trash"></i></button></td></tr>'
   ).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--l);">No hay productos</td></tr>';
   
@@ -467,28 +500,40 @@ function renderSelect() {
 
 function setPrice() {
   const p = data.products.find(x => x.id == document.getElementById('saleProduct').value);
-  if (p) document.getElementById('salePrice').value = p.price;
+  const priceInput = document.getElementById('salePrice');
+  if (p && priceInput) priceInput.value = p.price;
 }
 
 function updatePreview() {
   const id = parseInt(document.getElementById('saleProduct').value);
   const p = data.products.find(x => x.id === id);
   const preview = document.getElementById('productPreview');
+  if (!preview) return;
   
   if (p) {
-    document.getElementById('previewName').textContent = p.name;
-    document.getElementById('previewPrice').textContent = money(p.price);
-    const st = document.getElementById('previewStock');
-    st.textContent = 'Stock: ' + p.stock;
-    st.className = 'st' + (p.stock <= p.minStock ? ' low' : '');
-    const img = document.getElementById('productImage');
-    if (p.image) { img.innerHTML = '<img src="' + p.image + '">'; } 
-    else { img.innerHTML = '<i class="fas fa-cube"></i>'; }
+    const nameEl = document.getElementById('previewName');
+    const priceEl = document.getElementById('previewPrice');
+    const stockEl = document.getElementById('previewStock');
+    const imgEl = document.getElementById('productImage');
+    if (nameEl) nameEl.textContent = p.name;
+    if (priceEl) priceEl.textContent = money(p.price);
+    if (stockEl) {
+      stockEl.textContent = 'Stock: ' + p.stock;
+      stockEl.className = 'st' + (p.stock <= p.minStock ? ' low' : '');
+    }
+    if (imgEl) {
+      if (p.image) { imgEl.innerHTML = '<img src="' + p.image + '">'; } 
+      else { imgEl.innerHTML = '<i class="fas fa-cube"></i>'; }
+    }
   } else {
-    document.getElementById('previewName').textContent = 'Seleccioná un producto';
-    document.getElementById('previewPrice').textContent = '$0';
-    document.getElementById('previewStock').textContent = 'Stock: 0';
-    document.getElementById('productImage').innerHTML = '<i class="fas fa-cube"></i>';
+    const nameEl = document.getElementById('previewName');
+    const priceEl = document.getElementById('previewPrice');
+    const stockEl = document.getElementById('previewStock');
+    const imgEl = document.getElementById('productImage');
+    if (nameEl) nameEl.textContent = 'Seleccioná un producto';
+    if (priceEl) priceEl.textContent = '$0';
+    if (stockEl) stockEl.textContent = 'Stock: 0';
+    if (imgEl) imgEl.innerHTML = '<i class="fas fa-cube"></i>';
   }
 }
 
@@ -502,8 +547,10 @@ document.getElementById('saleProduct').onchange = function() {
 // ============================================
 function adjustQty(delta) {
   currentQty = Math.max(1, currentQty + delta);
-  document.getElementById('qtyDisplay').textContent = currentQty;
-  document.getElementById('saleQty').value = currentQty;
+  const display = document.getElementById('qtyDisplay');
+  const input = document.getElementById('saleQty');
+  if (display) display.textContent = currentQty;
+  if (input) input.value = currentQty;
 }
 
 // ============================================
@@ -588,7 +635,7 @@ function addToCart() {
   const p = data.products.find(x => x.id === id);
   
   if (!p || qty < 1 || qty > p.stock) {
-    showToast('Cantidad inválida', 'error');
+    showToast('Cantidad inválida o stock insuficiente', 'error');
     return;
   }
   
@@ -604,16 +651,21 @@ function addToCart() {
   showToast(qty + 'x ' + p.name + ' agregado', 'success');
   playBeep();
   currentQty = 1;
-  document.getElementById('qtyDisplay').textContent = '1';
-  document.getElementById('saleQty').value = '1';
+  const display = document.getElementById('qtyDisplay');
+  const input = document.getElementById('saleQty');
+  if (display) display.textContent = '1';
+  if (input) input.value = '1';
 }
 
 function renderCart() {
-  document.getElementById('cart').innerHTML = cart.map((i, n) => 
+  const cartEl = document.getElementById('cart');
+  if (!cartEl) return;
+  cartEl.innerHTML = cart.map((i, n) => 
     '<tr><td>' + i.name + '</td><td>' + i.qty + '</td><td>' + money(i.price) + '</td><td>' + money(i.total) + '</td><td><button class="btn btn-d btn-xs" onclick="removeFromCart(' + n + ')"><i class="fas fa-times"></i></button></td></tr>'
   ).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--l);">Carrito vacío</td></tr>';
   
-  document.getElementById('cartTotal').textContent = money(cart.reduce((a, i) => a + i.total, 0));
+  const totalEl = document.getElementById('cartTotal');
+  if (totalEl) totalEl.textContent = money(cart.reduce((a, i) => a + i.total, 0));
 }
 
 function removeFromCart(index) {
@@ -666,7 +718,9 @@ function quickSell(id) {
 // MOVIMIENTOS
 // ============================================
 function renderMoves() {
-  document.getElementById('moves').innerHTML = data.moves.map(m => 
+  const movesEl = document.getElementById('moves');
+  if (!movesEl) return;
+  movesEl.innerHTML = data.moves.map(m => 
     '<tr><td>' + m.date + '</td><td>' + m.product + '</td><td>' + m.qty + '</td><td>' + money(m.total) + '</td></tr>'
   ).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--l);">No hay movimientos</td></tr>';
 }
@@ -680,15 +734,18 @@ let currentFacing = 'environment';
 
 function startScanner() {
   const c = document.getElementById('S');
-  c.classList.add('active');
+  if (c) c.classList.add('active');
   
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    document.getElementById('scannerStatus').innerHTML = '❌ No se puede acceder a la cámara';
+    const status = document.getElementById('scannerStatus');
+    if (status) status.innerHTML = '❌ No se puede acceder a la cámara';
     return;
   }
   
-  document.getElementById('scannerStatus').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando...';
-  document.querySelector('#SV').innerHTML = '<div class="so"></div>';
+  const status = document.getElementById('scannerStatus');
+  if (status) status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando...';
+  const view = document.querySelector('#SV');
+  if (view) view.innerHTML = '<div class="so"></div>';
   
   Quagga.init({
     inputStream: {
@@ -699,10 +756,13 @@ function startScanner() {
     },
     decoder: { readers: ["ean_reader", "ean_8_reader", "code_128_reader", "code_39_reader", "upc_reader"] }
   }, function(err) {
-    if (err) { document.getElementById('scannerStatus').innerHTML = '❌ Error'; return; }
+    if (err) {
+      if (status) status.innerHTML = '❌ Error';
+      return;
+    }
     Quagga.start();
     scannerRunning = true;
-    document.getElementById('scannerStatus').innerHTML = '<i class="fas fa-camera"></i> Apuntá al código';
+    if (status) status.innerHTML = '<i class="fas fa-camera"></i> Apuntá al código';
   });
   
   Quagga.onDetected(function(result) {
@@ -710,17 +770,20 @@ function startScanner() {
     scanDebounce = true;
     
     const code = result.codeResult.code;
-    document.getElementById('scannerStatus').innerHTML = '✅ Código: ' + code;
+    if (status) status.innerHTML = '✅ Código: ' + code;
     playBeep();
     
     const product = data.products.find(p => p.barcode === code);
     if (product) {
-      document.getElementById('saleProduct').value = product.id;
+      const sel = document.getElementById('saleProduct');
+      if (sel) sel.value = product.id;
       updatePreview();
       setPrice();
       currentQty = 1;
-      document.getElementById('qtyDisplay').textContent = '1';
-      document.getElementById('saleQty').value = '1';
+      const display = document.getElementById('qtyDisplay');
+      const input = document.getElementById('saleQty');
+      if (display) display.textContent = '1';
+      if (input) input.value = '1';
       
       const qty = 1;
       if (product.stock >= qty) {
@@ -755,9 +818,12 @@ function startScanner() {
 
 function stopScanner() {
   if (scannerRunning) { try { Quagga.stop(); } catch(e) {} scannerRunning = false; }
-  document.getElementById('S').classList.remove('active');
-  document.querySelector('#SV').innerHTML = '';
-  document.getElementById('scannerStatus').innerHTML = '<i class="fas fa-camera"></i> Apuntá al código';
+  const c = document.getElementById('S');
+  if (c) c.classList.remove('active');
+  const view = document.querySelector('#SV');
+  if (view) view.innerHTML = '';
+  const status = document.getElementById('scannerStatus');
+  if (status) status.innerHTML = '<i class="fas fa-camera"></i> Apuntá al código';
 }
 
 function toggleTorch() {
@@ -781,17 +847,23 @@ function loadGitHubConfig() {
   if (saved) {
     try {
       githubConfig = JSON.parse(saved);
-      document.getElementById('githubUser').value = githubConfig.user || '';
-      document.getElementById('githubRepo').value = githubConfig.repo || '';
-      document.getElementById('githubToken').value = githubConfig.token || '';
+      const gu = document.getElementById('githubUser');
+      const gr = document.getElementById('githubRepo');
+      const gt = document.getElementById('githubToken');
+      if (gu) gu.value = githubConfig.user || '';
+      if (gr) gr.value = githubConfig.repo || '';
+      if (gt) gt.value = githubConfig.token || '';
     } catch(e) {}
   }
 }
 
 function saveGitHubConfig() {
-  githubConfig.user = document.getElementById('githubUser').value.trim();
-  githubConfig.repo = document.getElementById('githubRepo').value.trim();
-  githubConfig.token = document.getElementById('githubToken').value.trim();
+  const gu = document.getElementById('githubUser');
+  const gr = document.getElementById('githubRepo');
+  const gt = document.getElementById('githubToken');
+  githubConfig.user = gu ? gu.value.trim() : '';
+  githubConfig.repo = gr ? gr.value.trim() : '';
+  githubConfig.token = gt ? gt.value.trim() : '';
   if (!githubConfig.user || !githubConfig.repo || !githubConfig.token) {
     showToast('⚠️ Completá todos los campos', 'error');
     return;
@@ -865,7 +937,8 @@ async function syncFromGitHub() {
 // RELOJ
 // ============================================
 setInterval(() => {
-  document.getElementById('clock').textContent = dateTimeStr();
+  const clock = document.getElementById('clock');
+  if (clock) clock.textContent = dateTimeStr();
 }, 1000);
 
 // ============================================
@@ -882,7 +955,8 @@ function renderAll() {
 // ============================================
 // INICIO
 // ============================================
-document.getElementById('clock').textContent = dateTimeStr();
+const clock = document.getElementById('clock');
+if (clock) clock.textContent = dateTimeStr();
 loadGitHubConfig();
 
 console.log('🚀 A220 - Sistema de Gestión');
