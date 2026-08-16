@@ -1,0 +1,2242 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <title>A 220 | Gestión</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js">
+    </script>
+    <style>
+        /* ========================================
+           RESET Y VARIABLES
+        ======================================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        :root {
+            --primary: #0f172a;
+            --primary-light: #1e293b;
+            --accent: #f59e0b;
+            --accent-hover: #d97706;
+            --bg: #f1f5f9;
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --radius: 16px;
+            --radius-sm: 10px;
+            --shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
+            --shadow-hover: 0 20px 60px rgba(0, 0, 0, 0.10);
+            --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --info: #3b82f6;
+        }
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f1f5f9;
+            --text-light: #94a3b8;
+            --border: #334155;
+        }
+        body {
+            font-family: var(--font);
+            background: var(--bg);
+            color: var(--text);
+            transition: 0.3s;
+            min-height: 100vh;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 10px;
+        }
+
+        /* ========================================
+           LOGIN
+        ======================================== */
+        #loginOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeIn 0.4s ease;
+        }
+        #loginOverlay.hidden {
+            display: none;
+        }
+        .login-box {
+            background: var(--card-bg);
+            padding: 48px 40px 40px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-hover);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .login-box .brand {
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--primary);
+        }
+        .login-box .brand span {
+            color: var(--accent);
+        }
+        .login-box .sub {
+            color: var(--text-light);
+            font-size: 14px;
+            margin: 8px 0 28px;
+        }
+        .login-box input {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 15px;
+            margin-bottom: 14px;
+            background: var(--bg);
+            color: var(--text);
+            transition: 0.3s;
+            text-align: center;
+            letter-spacing: 4px;
+        }
+        .login-box input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.15);
+        }
+        .login-box .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--accent);
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 16px;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .login-box .login-btn:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+        .login-box .error {
+            color: var(--danger);
+            font-size: 14px;
+            margin-top: 10px;
+            min-height: 22px;
+        }
+
+        /* ========================================
+           HEADER
+        ======================================== */
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        header .brand {
+            font-size: 22px;
+            font-weight: 900;
+        }
+        header .brand span {
+            color: var(--accent);
+        }
+        header .sub {
+            font-size: 11px;
+            color: #94a3b8;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .header-right #clock {
+            font-size: 13px;
+            color: #cbd5e1;
+        }
+        .badge-sync {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .badge-sync .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse 1.5s infinite;
+            background: #22c55e;
+        }
+        @keyframes pulse {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.3;
+            }
+        }
+        .theme-toggle,
+        .logout-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            color: #94a3b8;
+            padding: 4px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: 0.3s;
+        }
+        .theme-toggle:hover,
+        .logout-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        .logout-btn:hover {
+            color: #f87171;
+        }
+
+        /* ========================================
+           NAV
+        ======================================== */
+        nav {
+            display: flex;
+            gap: 3px;
+            padding: 8px 16px;
+            background: var(--card-bg);
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            position: sticky;
+            top: 62px;
+            z-index: 99;
+        }
+        nav button {
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 8px 14px;
+            cursor: pointer;
+            font-weight: 600;
+            background: transparent;
+            color: var(--text-light);
+            transition: 0.3s;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        nav button i {
+            font-size: 14px;
+        }
+        nav button:hover {
+            background: var(--bg);
+            color: var(--text);
+        }
+        nav button.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+        }
+        nav button.active i {
+            color: var(--accent);
+        }
+
+        /* ========================================
+           MAIN
+        ======================================== */
+        main {
+            padding: 16px 20px;
+            max-width: 1280px;
+            margin: auto;
+        }
+        .view {
+            display: none;
+            animation: fadeIn 0.35s ease;
+        }
+        .view.active {
+            display: block;
+        }
+        .view h2 {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .view h2 i {
+            color: var(--accent);
+        }
+
+        /* ========================================
+           CARDS
+        ======================================== */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .card {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 16px 18px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
+        .card .label {
+            font-size: 12px;
+            color: var(--text-light);
+            font-weight: 500;
+        }
+        .card .num {
+            font-size: 26px;
+            font-weight: 900;
+            margin-top: 2px;
+        }
+
+        /* ========================================
+           PANELS
+        ======================================== */
+        .panel {
+            background: var(--card-bg);
+            border-radius: var(--radius);
+            padding: 16px 20px;
+            margin-top: 14px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            transition: 0.3s;
+        }
+        .panel:hover {
+            box-shadow: var(--shadow-hover);
+        }
+        .panel h3 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel h3 i {
+            color: var(--accent);
+        }
+
+        /* ========================================
+           PRODUCTO PREVIEW (NUEVO)
+        ======================================== */
+        .product-preview {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            border: 2px solid var(--border);
+            transition: 0.3s;
+        }
+        .product-preview.has-product {
+            border-color: var(--accent);
+            background: rgba(245, 158, 11, 0.05);
+        }
+        .product-preview .product-image {
+            width: 70px;
+            height: 70px;
+            border-radius: var(--radius-sm);
+            background: var(--card-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: var(--text-light);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .product-preview .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .product-preview .product-info {
+            flex: 1;
+        }
+        .product-preview .product-info .name {
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .product-preview .product-info .price {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--accent);
+        }
+        .product-preview .product-info .stock {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+        .product-preview .product-info .stock.low {
+            color: var(--danger);
+            font-weight: 700;
+        }
+
+        /* ========================================
+           SELECTOR DE CANTIDAD (NUEVO)
+        ======================================== */
+        .qty-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+        }
+        .qty-selector button {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .qty-selector button.minus {
+            background: var(--bg);
+            color: var(--text);
+        }
+        .qty-selector button.minus:hover {
+            background: var(--danger);
+            color: white;
+        }
+        .qty-selector button.plus {
+            background: var(--accent);
+            color: var(--primary);
+        }
+        .qty-selector button.plus:hover {
+            background: var(--accent-hover);
+            transform: scale(1.05);
+        }
+        .qty-selector .qty-value {
+            font-size: 22px;
+            font-weight: 800;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        /* ========================================
+           SCANNER BUTTON
+        ======================================== */
+        .scanner-btn {
+            background: var(--success);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        .scanner-btn:hover {
+            background: #16a34a;
+            transform: scale(1.02);
+        }
+        .scanner-btn i {
+            font-size: 18px;
+        }
+
+        /* ========================================
+           SCANNER OVERLAY
+        ======================================== */
+        #scannerContainer {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        #scannerContainer.active {
+            display: flex;
+        }
+        #scannerContainer #scannerView {
+            width: 100%;
+            max-width: 500px;
+            aspect-ratio: 4/3;
+            background: #000;
+            border-radius: var(--radius);
+            overflow: hidden;
+            position: relative;
+            border: 3px solid var(--accent);
+        }
+        #scannerContainer #scannerView video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #scannerContainer .scanner-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            height: 50%;
+            border: 3px dashed rgba(245, 158, 11, 0.6);
+            border-radius: 12px;
+            pointer-events: none;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+        }
+        #scannerContainer .scanner-overlay::after {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 3px;
+            background: var(--accent);
+            animation: scanLine 2s ease-in-out infinite;
+        }
+        @keyframes scanLine {
+            0%,
+            100% {
+                top: -3px;
+            }
+            50% {
+                top: calc(100% - 3px);
+            }
+        }
+        #scannerContainer .scanner-controls {
+            margin-top: 16px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        #scannerContainer .scanner-status {
+            color: white;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 6px 16px;
+            border-radius: var(--radius-sm);
+        }
+        #scannerContainer .scanner-status .highlight {
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        /* ========================================
+           FORMS
+        ======================================== */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .form-grid label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-light);
+            display: block;
+            margin-bottom: 3px;
+        }
+        .form-grid input,
+        .form-grid select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            background: var(--bg);
+            color: var(--text);
+            transition: 0.3s;
+        }
+        .form-grid input:focus,
+        .form-grid select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.10);
+        }
+
+        /* ========================================
+           BUTTONS
+        ======================================== */
+        .btn {
+            border: none;
+            border-radius: var(--radius-sm);
+            padding: 8px 16px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13px;
+            transition: 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--primary-light);
+            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.25);
+        }
+        .btn-accent {
+            background: var(--accent);
+            color: var(--primary);
+        }
+        .btn-accent:hover {
+            background: var(--accent-hover);
+            box-shadow: 0 4px 16px rgba(245, 158, 11, 0.3);
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        .btn-success:hover {
+            background: #16a34a;
+        }
+        .btn-info {
+            background: var(--info);
+            color: white;
+        }
+        .btn-info:hover {
+            background: #2563eb;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--border);
+            color: var(--text);
+        }
+        .btn-outline:hover {
+            border-color: var(--accent);
+            background: var(--bg);
+        }
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 11px;
+        }
+        .btn-xs {
+            padding: 3px 8px;
+            font-size: 10px;
+            border-radius: 4px;
+        }
+
+        .panel-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        /* ========================================
+           TABLES
+        ======================================== */
+        .table-wrap {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        th,
+        td {
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: var(--bg);
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-light);
+        }
+        tr:hover td {
+            background: rgba(245, 158, 11, 0.03);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 1px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .badge-danger {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        .badge-success {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .badge-info {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .stock-low {
+            color: var(--danger);
+            font-weight: 800;
+        }
+        .stock-ok {
+            color: var(--success);
+            font-weight: 700;
+        }
+
+        /* ========================================
+           CART
+        ======================================== */
+        .total {
+            font-size: 24px;
+            font-weight: 900;
+            text-align: right;
+            margin: 12px 0;
+            padding: 12px 16px;
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            border: 2px solid var(--border);
+        }
+        .total span {
+            color: var(--accent);
+        }
+
+        /* ========================================
+           TOASTS
+        ======================================== */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .toast {
+            background: var(--primary);
+            color: white;
+            padding: 10px 18px;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-hover);
+            animation: slideUp 0.4s ease;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid var(--accent);
+            max-width: 380px;
+            font-size: 13px;
+        }
+        .toast i {
+            font-size: 18px;
+            color: var(--accent);
+        }
+        .toast.error {
+            border-left-color: var(--danger);
+        }
+        .toast.error i {
+            color: var(--danger);
+        }
+        .toast.success {
+            border-left-color: var(--success);
+        }
+        .toast.success i {
+            color: var(--success);
+        }
+
+        /* ========================================
+           FLASH OVERLAY
+        ======================================== */
+        .flash-overlay {
+            position: fixed;
+            inset: 0;
+            background: white;
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.1s;
+        }
+        .flash-overlay.active {
+            opacity: 0.6;
+        }
+
+        /* ========================================
+           SCAN LOG
+        ======================================== */
+        .scan-log {
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+        .scan-log div {
+            padding: 4px 8px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+        }
+        .scan-log .time {
+            color: var(--text-light);
+            font-size: 10px;
+        }
+
+        .barcode-badge {
+            background: var(--bg);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 10px;
+            color: var(--text-light);
+        }
+
+        /* ========================================
+           SYNC LOG
+        ======================================== */
+        #syncLog {
+            margin-top: 12px;
+            font-size: 12px;
+            color: var(--text-light);
+            border-top: 1px solid var(--border);
+            padding-top: 10px;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        /* ========================================
+           RESPONSIVE
+        ======================================== */
+        @media(max-width: 768px) {
+            header {
+                padding: 10px 14px;
+            }
+            header .brand {
+                font-size: 18px;
+            }
+            nav {
+                padding: 6px 10px;
+                top: 56px;
+            }
+            nav button {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+            main {
+                padding: 10px 12px;
+            }
+            .cards {
+                grid-template-columns: 1fr 1fr;
+            }
+            .login-box {
+                padding: 28px 16px;
+                margin: 0 12px;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .panel {
+                padding: 12px 14px;
+            }
+            .product-preview {
+                flex-direction: column;
+                text-align: center;
+            }
+            .product-preview .product-image {
+                width: 100px;
+                height: 100px;
+            }
+        }
+        @media(max-width: 480px) {
+            .cards {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ========================================
+           FOOTER
+        ======================================== */
+        .app-footer {
+            text-align: center;
+            padding: 16px 16px 12px;
+            color: var(--text-light);
+            font-size: 12px;
+            border-top: 1px solid var(--border);
+            margin-top: 20px;
+        }
+        .app-footer strong {
+            color: var(--accent);
+        }
+
+        /* ========================================
+           ANIMATIONS
+        ======================================== */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========================================
+    FLASH OVERLAY
+    ======================================== -->
+    <div class="flash-overlay" id="flashOverlay"></div>
+
+    <!-- ========================================
+    LOGIN
+    ======================================== -->
+    <div id="loginOverlay">
+        <div class="login-box">
+            <div class="brand">A <span>220</span></div>
+            <div class="sub">Sistema de Gestión</div>
+            <input type="password" id="loginPass" placeholder="Contraseña" style="text-align:center;font-size:18px;letter-spacing:4px;">
+            <button class="login-btn" onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> Ingresar</button>
+            <div class="error" id="loginError"></div>
+            <div style="margin-top:14px;font-size:11px;color:var(--text-light);">
+                <i class="fas fa-lock"></i> Ingresá la contraseña
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================
+    SCANNER
+    ======================================== -->
+    <div id="scannerContainer">
+        <div id="scannerView">
+            <div class="scanner-overlay"></div>
+        </div>
+        <div class="scanner-status" id="scannerStatus">
+            <i class="fas fa-camera"></i> Apuntá al código de barras
+        </div>
+        <div class="scanner-controls">
+            <button class="btn btn-danger" onclick="stopScanner()"><i class="fas fa-times"></i> Cerrar</button>
+            <button class="btn btn-accent" onclick="toggleTorch()"><i class="fas fa-lightbulb"></i> Linterna</button>
+            <button class="btn btn-info" onclick="switchCamera()"><i class="fas fa-sync-alt"></i> Cambiar cámara</button>
+        </div>
+    </div>
+
+    <!-- ========================================
+    TOASTS
+    ======================================== -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ========================================
+    HEADER
+    ======================================== -->
+    <header>
+        <div>
+            <div class="brand">A <span>220</span></div>
+            <div class="sub">Gestión · Kiosco</div>
+        </div>
+        <div class="header-right">
+            <div id="clock"></div>
+            <span class="badge-sync">
+                <span class="dot"></span> GitHub
+            </span>
+            <button class="theme-toggle" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+            <button class="logout-btn" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i></button>
+        </div>
+    </header>
+
+    <!-- ========================================
+    NAV
+    ======================================== -->
+    <nav>
+        <button class="active" onclick="show('inicio',this)"><i class="fas fa-chart-pie"></i> Inicio</button>
+        <button onclick="show('ventas',this)"><i class="fas fa-cart-plus"></i> Ventas</button>
+        <button onclick="show('productos',this)"><i class="fas fa-boxes"></i> Productos</button>
+        <button onclick="show('movimientos',this)"><i class="fas fa-history"></i> Movimientos</button>
+        <button onclick="show('sync',this)"><i class="fas fa-sync"></i> Sincronizar</button>
+    </nav>
+
+    <!-- ========================================
+    MAIN
+    ======================================== -->
+    <main>
+
+        <!-- ========================================
+        INICIO
+        ======================================== -->
+        <section id="inicio" class="view active">
+            <h2><i class="fas fa-chart-pie"></i> Panel de control</h2>
+            <div class="cards">
+                <div class="card"><div class="label"><i class="fas fa-dollar-sign"></i> Ventas hoy</div><div class="num" id="dVentas">$0</div></div>
+                <div class="card"><div class="label"><i class="fas fa-box"></i> Productos</div><div class="num" id="dProductos">0</div></div>
+                <div class="card"><div class="label"><i class="fas fa-exclamation-triangle"></i> Stock bajo</div><div class="num" id="dBajo">0</div></div>
+                <div class="card"><div class="label"><i class="fas fa-shopping-bag"></i> Unidades</div><div class="num" id="dUnidades">0</div></div>
+            </div>
+            <div class="panel">
+                <h3><i class="fas fa-bell"></i> Alertas de stock</h3>
+                <div id="alertas">Sin alertas.</div>
+            </div>
+            <div class="panel">
+                <h3><i class="fas fa-chart-bar"></i> Ventas por categoría</h3>
+                <div id="categorySummary">Cargando...</div>
+            </div>
+        </section>
+
+        <!-- ========================================
+        VENTAS (MEJORADO)
+        ======================================== -->
+        <section id="ventas" class="view">
+            <h2><i class="fas fa-cart-plus"></i> Nueva venta</h2>
+
+            <div class="panel">
+                <!-- Escáner -->
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+                    <button class="scanner-btn" onclick="startScanner()">
+                        <i class="fas fa-camera"></i> 📷 Escanear código
+                    </button>
+                    <span style="display:flex;align-items:center;color:var(--text-light);font-size:12px;">
+                        <i class="fas fa-info-circle"></i> Apuntá al código con la cámara
+                    </span>
+                </div>
+
+                <!-- Selector de producto -->
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:12px;font-weight:600;color:var(--text-light);display:block;margin-bottom:4px;">Producto</label>
+                    <select id="saleProduct" onchange="updateProductPreview()" style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:14px;background:var(--bg);color:var(--text);"></select>
+                </div>
+
+                <!-- Vista previa del producto (NUEVO) -->
+                <div class="product-preview" id="productPreview">
+                    <div class="product-image" id="productImage">
+                        <i class="fas fa-cube"></i>
+                    </div>
+                    <div class="product-info">
+                        <div class="name" id="previewName">Seleccioná un producto</div>
+                        <div class="price" id="previewPrice">$0</div>
+                        <div class="stock" id="previewStock">Stock: 0</div>
+                    </div>
+                </div>
+
+                <!-- Selector de cantidad (NUEVO) -->
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:12px;font-weight:600;color:var(--text-light);display:block;margin-bottom:4px;">Cantidad</label>
+                    <div class="qty-selector">
+                        <button class="minus" onclick="adjustQty(-1)"><i class="fas fa-minus"></i></button>
+                        <span class="qty-value" id="saleQtyDisplay">1</span>
+                        <button class="plus" onclick="adjustQty(1)"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <input type="hidden" id="saleQty" value="1">
+                </div>
+
+                <!-- Precio -->
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:12px;font-weight:600;color:var(--text-light);display:block;margin-bottom:4px;">Precio</label>
+                    <input id="salePrice" type="number" min="0" step="0.01" style="width:100%;padding:10px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:14px;background:var(--bg);color:var(--text);">
+                </div>
+
+                <!-- Botón agregar -->
+                <button class="btn btn-accent" onclick="addSale()" style="width:100%;justify-content:center;padding:12px;">
+                    <i class="fas fa-plus"></i> Agregar al carrito
+                </button>
+            </div>
+
+            <!-- Carrito -->
+            <div class="panel">
+                <h3><i class="fas fa-shopping-cart"></i> Carrito</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th><th></th></tr></thead>
+                        <tbody id="cart"></tbody>
+                    </table>
+                </div>
+                <div class="total">Total: <span id="saleTotal">$0</span></div>
+                <button class="btn btn-success" onclick="finishSale()" style="width:100%;justify-content:center;padding:12px;">
+                    <i class="fas fa-check"></i> Cobrar venta
+                </button>
+            </div>
+
+            <!-- Historial de escaneos -->
+            <div class="panel">
+                <h3><i class="fas fa-qrcode"></i> Últimos escaneos</h3>
+                <div class="scan-log" id="scanLog">
+                    <div style="color:var(--text-light);text-align:center;padding:12px;">Sin escaneos aún</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================
+        PRODUCTOS
+        ======================================== -->
+        <section id="productos" class="view">
+            <h2><i class="fas fa-boxes"></i> Productos</h2>
+            <div class="panel">
+                <h3><i class="fas fa-plus-circle"></i> Agregar producto</h3>
+                <div class="form-grid">
+                    <div><label>Nombre</label><input id="pName" placeholder="Ej. Yerba 500g"></div>
+                    <div><label>Categoría</label><input id="pCat" placeholder="Ej. Almacén" value="General"></div>
+                    <div><label>Precio</label><input id="pPrice" type="number" step="0.01"></div>
+                    <div><label>Stock</label><input id="pStock" type="number" min="0"></div>
+                    <div><label>Stock mínimo</label><input id="pMinStock" type="number" min="0" value="3"></div>
+                    <div><label>Código barras</label>
+                        <div style="display:flex;gap:6px;">
+                            <input id="pBarcode" placeholder="Ej. 7791234567890" style="flex:1;">
+                            <button class="btn btn-outline btn-sm" onclick="document.getElementById('pBarcode').value='BAR'+Date.now().toString().slice(-8)"><i class="fas fa-random"></i></button>
+                        </div>
+                    </div>
+                    <div><label>URL de imagen (opcional)</label>
+                        <input id="pImage" placeholder="https://ejemplo.com/producto.jpg" style="width:100%;">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="addProduct()"><i class="fas fa-save"></i> Guardar</button>
+            </div>
+            <div class="panel">
+                <div style="margin-bottom:12px;">
+                    <input id="productSearch" placeholder="🔍 Buscar producto..." oninput="renderProducts()" style="width:100%;padding:8px 12px;border:2px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);color:var(--text);">
+                </div>
+                <div class="table-wrap"><table><thead><tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Código</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody id="productTable"></tbody></table></div>
+            </div>
+        </section>
+
+        <!-- ========================================
+        MOVIMIENTOS
+        ======================================== -->
+        <section id="movimientos" class="view">
+            <h2><i class="fas fa-history"></i> Movimientos</h2>
+            <div class="panel">
+                <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Producto</th><th>Cantidad</th><th>Total</th></tr></thead><tbody id="moves"></tbody></table></div>
+            </div>
+        </section>
+
+        <!-- ========================================
+        SINCRONIZACIÓN
+        ======================================== -->
+        <section id="sync" class="view">
+            <h2><i class="fas fa-sync"></i> Sincronización</h2>
+
+            <!-- CONFIGURACIÓN DE GITHUB -->
+            <div class="panel">
+                <h3><i class="fas fa-github"></i> Configuración de GitHub</h3>
+                <div class="form-grid">
+                    <div>
+                        <label>Usuario de GitHub</label>
+                        <input id="githubUser" placeholder="Ej. tu-usuario">
+                    </div>
+                    <div>
+                        <label>Repositorio</label>
+                        <input id="githubRepo" placeholder="Ej. a220-data" value="a220-data">
+                    </div>
+                    <div>
+                        <label>Token (Personal Access Token)</label>
+                        <input id="githubToken" placeholder="ghp_xxxxx" type="password">
+                    </div>
+                </div>
+                <div style="font-size:12px;color:var(--text-light);margin-bottom:10px;">
+                    <i class="fas fa-info-circle"></i>
+                    Creá un token en: <strong>GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)</strong>
+                    <br>Permisos necesarios: <strong>repo</strong>
+                </div>
+                <button class="btn btn-primary" onclick="saveGitHubConfig()"><i class="fas fa-save"></i> Guardar configuración</button>
+            </div>
+
+            <!-- ACCIONES DE SINCRONIZACIÓN -->
+            <div class="panel">
+                <h3><i class="fas fa-arrows-rotate"></i> Sincronizar datos</h3>
+                <div class="panel-actions">
+                    <button class="btn btn-success" onclick="syncToGitHub()"><i class="fas fa-upload"></i> Subir a GitHub (PC → Nube)</button>
+                    <button class="btn btn-info" onclick="syncFromGitHub()"><i class="fas fa-download"></i> Descargar de GitHub (Nube → PC)</button>
+                </div>
+                <div id="syncLog">
+                    <div>📡 Configurá GitHub arriba</div>
+                    <div>📤 Subí para guardar los datos en la nube</div>
+                    <div>📥 Descargá para traer los datos desde la nube</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================
+        FOOTER
+        ======================================== -->
+        <div class="app-footer">
+            A <strong>220</strong> v3.0 · Sincronización con GitHub
+        </div>
+
+    </main>
+
+    <!-- ========================================
+    JAVASCRIPT
+    ======================================== -->
+    <script>
+        /* ========================================
+           CONTRASEÑA ÚNICA
+        ======================================== */
+        const PASSWORD = 'Lujoci10$$$';
+        let isLoggedIn = false;
+        let data = { products: [], sales: [], moves: [], scans: [] };
+        let cart = [];
+        let selectedProductId = null;
+
+        /* ========================================
+           GITHUB CONFIG
+        ======================================== */
+        let githubConfig = {
+            user: '',
+            repo: '',
+            token: ''
+        };
+
+        function loadGitHubConfig() {
+            const saved = localStorage.getItem('a220_github_config');
+            if (saved) {
+                try {
+                    githubConfig = JSON.parse(saved);
+                    document.getElementById('githubUser').value = githubConfig.user || '';
+                    document.getElementById('githubRepo').value = githubConfig.repo || '';
+                    document.getElementById('githubToken').value = githubConfig.token || '';
+                } catch (e) {}
+            }
+        }
+
+        function saveGitHubConfig() {
+            githubConfig.user = document.getElementById('githubUser').value.trim();
+            githubConfig.repo = document.getElementById('githubRepo').value.trim();
+            githubConfig.token = document.getElementById('githubToken').value.trim();
+
+            if (!githubConfig.user || !githubConfig.repo || !githubConfig.token) {
+                showToast('⚠️ Completá todos los campos', 'error');
+                return;
+            }
+
+            localStorage.setItem('a220_github_config', JSON.stringify(githubConfig));
+            showToast('✅ Configuración guardada', 'success');
+            addSyncLog('✅ Configuración de GitHub guardada');
+        }
+
+        /* ========================================
+           FUNCIONES DE GITHUB
+        ======================================== */
+        function addSyncLog(msg) {
+            const log = document.getElementById('syncLog');
+            if (!log) return;
+            const div = document.createElement('div');
+            div.textContent = '🕐 ' + new Date().toLocaleTimeString() + ' - ' + msg;
+            log.prepend(div);
+            if (log.children.length > 20) log.removeChild(log.lastChild);
+        }
+
+        async function syncToGitHub() {
+            if (!githubConfig.user || !githubConfig.repo || !githubConfig.token) {
+                showToast('⚠️ Configurá GitHub primero', 'error');
+                return;
+            }
+
+            const filename = 'a220_data.json';
+            const url =
+                `https://api.github.com/repos/${githubConfig.user}/${githubConfig.repo}/contents/${filename}`;
+
+            try {
+                addSyncLog('📤 Subiendo datos a GitHub...');
+                showToast('📤 Subiendo a GitHub...', 'info');
+
+                const dataStr = JSON.stringify(data, null, 2);
+                const content = btoa(unescape(encodeURIComponent(dataStr)));
+
+                let sha = null;
+                try {
+                    const getResponse = await fetch(url, {
+                        headers: {
+                            'Authorization': `token ${githubConfig.token}`,
+                            'Accept': 'application/vnd.github.v3+json'
+                        }
+                    });
+                    if (getResponse.ok) {
+                        const fileData = await getResponse.json();
+                        sha = fileData.sha;
+                    }
+                } catch (e) {}
+
+                const body = {
+                    message: 'Actualización automática de datos A220 - ' + new Date().toLocaleString(),
+                    content: content,
+                    branch: 'main'
+                };
+                if (sha) body.sha = sha;
+
+                const response = await fetch(url, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `token ${githubConfig.token}`,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
+                    },
+                    body: JSON.stringify(body)
+                });
+
+                if (response.ok) {
+                    showToast('✅ Datos subidos a GitHub', 'success');
+                    addSyncLog('✅ Datos subidos correctamente a GitHub');
+                    playBeep();
+                } else {
+                    const error = await response.json();
+                    showToast('❌ Error al subir: ' + (error.message || 'Error desconocido'), 'error');
+                    addSyncLog('❌ Error al subir: ' + (error.message || 'Error desconocido'));
+                }
+            } catch (error) {
+                showToast('❌ Error: ' + error.message, 'error');
+                addSyncLog('❌ Error: ' + error.message);
+                console.error(error);
+            }
+        }
+
+        async function syncFromGitHub() {
+            if (!githubConfig.user || !githubConfig.repo || !githubConfig.token) {
+                showToast('⚠️ Configurá GitHub primero', 'error');
+                return;
+            }
+
+            const filename = 'a220_data.json';
+            const url =
+                `https://api.github.com/repos/${githubConfig.user}/${githubConfig.repo}/contents/${filename}`;
+
+            try {
+                addSyncLog('📥 Descargando datos desde GitHub...');
+                showToast('📥 Descargando desde GitHub...', 'info');
+
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `token ${githubConfig.token}`,
+                        'Accept': 'application/vnd.github.v3+json'
+                    }
+                });
+
+                if (response.ok) {
+                    const fileData = await response.json();
+                    const content = decodeURIComponent(escape(atob(fileData.content)));
+                    const downloadedData = JSON.parse(content);
+
+                    if (downloadedData.products) {
+                        data = downloadedData;
+                        save();
+                        showToast('✅ Datos descargados de GitHub', 'success');
+                        addSyncLog('✅ Datos descargados correctamente de GitHub');
+                        playBeep();
+                        renderAll();
+                    } else {
+                        showToast('⚠️ El archivo no tiene datos válidos', 'error');
+                        addSyncLog('⚠️ El archivo no tiene datos válidos');
+                    }
+                } else if (response.status === 404) {
+                    showToast('⚠️ No hay datos en GitHub. Subí primero.', 'error');
+                    addSyncLog('⚠️ No hay datos en GitHub. Subí primero.');
+                } else {
+                    const error = await response.json();
+                    showToast('❌ Error al descargar: ' + (error.message || 'Error desconocido'), 'error');
+                    addSyncLog('❌ Error al descargar: ' + (error.message || 'Error desconocido'));
+                }
+            } catch (error) {
+                showToast('❌ Error: ' + error.message, 'error');
+                addSyncLog('❌ Error: ' + error.message);
+                console.error(error);
+            }
+        }
+
+        /* ========================================
+           LOGIN
+        ======================================== */
+        function doLogin() {
+            const pass = document.getElementById('loginPass').value.trim();
+            const error = document.getElementById('loginError');
+
+            if (!pass) {
+                error.textContent = 'Ingresá la contraseña';
+                return;
+            }
+
+            if (pass === PASSWORD) {
+                isLoggedIn = true;
+                document.getElementById('loginOverlay').classList.add('hidden');
+                loadGitHubConfig();
+                loadData();
+                renderAll();
+                showToast('✅ ¡Bienvenido!', 'success');
+                generateQR();
+                showLocalUrl();
+                addSyncLog('✅ Sesión iniciada');
+            } else {
+                error.textContent = '❌ Contraseña incorrecta';
+                document.getElementById('loginPass').value = '';
+                document.getElementById('loginPass').focus();
+            }
+        }
+
+        function doLogout() {
+            if (confirm('¿Cerrar sesión?')) {
+                isLoggedIn = false;
+                document.getElementById('loginOverlay').classList.remove('hidden');
+                document.getElementById('loginError').textContent = '';
+                document.getElementById('loginPass').value = '';
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !document.getElementById('loginOverlay').classList.contains('hidden')) {
+                doLogin();
+            }
+        });
+
+        /* ========================================
+           THEME
+        ======================================== */
+        let darkMode = localStorage.getItem('a220_theme') === 'dark';
+
+        function applyTheme() {
+            document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+            document.querySelector('.theme-toggle i').className = darkMode ? 'fas fa-sun' : 'fas fa-moon';
+            localStorage.setItem('a220_theme', darkMode ? 'dark' : 'light');
+        }
+        applyTheme();
+
+        function toggleTheme() {
+            darkMode = !darkMode;
+            applyTheme();
+        }
+
+        /* ========================================
+           TOAST
+        ======================================== */
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<i class="fas ${icons[type] || icons.info}"></i> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(100px)';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        /* ========================================
+           SOUND
+        ======================================== */
+        function playBeep() {
+            try {
+                const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = 800;
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.15);
+            } catch (e) {}
+        }
+
+        function playErrorBeep() {
+            try {
+                const audioCtx = new(window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = 300;
+                osc.type = 'sawtooth';
+                gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } catch (e) {}
+        }
+
+        function flashScreen() {
+            const flash = document.getElementById('flashOverlay');
+            flash.classList.add('active');
+            setTimeout(() => flash.classList.remove('active'), 150);
+        }
+
+        /* ========================================
+           DATA
+        ======================================== */
+        const KEY = 'a220_data_v3';
+
+        function loadData() {
+            const saved = localStorage.getItem(KEY);
+            if (saved) {
+                try {
+                    data = JSON.parse(saved);
+                } catch (e) {
+                    data = getInitialData();
+                }
+            } else {
+                data = getInitialData();
+            }
+            if (!data.products) data.products = [];
+            if (!data.sales) data.sales = [];
+            if (!data.moves) data.moves = [];
+            if (!data.scans) data.scans = [];
+        }
+
+        function getInitialData() {
+            return {
+                products: [
+                    { id: 1, name: 'Agua 500 ml', cat: 'Bebidas', price: 1200, stock: 24, minStock: 3,
+                        barcode: '7791234567890', image: '' },
+                    { id: 2, name: 'Gaseosa individual', cat: 'Bebidas', price: 1800, stock: 18, minStock: 3,
+                        barcode: '7791234567891', image: '' },
+                    { id: 3, name: 'Yerba 500 g', cat: 'Almacén', price: 3500, stock: 10, minStock: 3,
+                        barcode: '7791234567892', image: '' },
+                    { id: 4, name: 'Alfajor', cat: 'Golosinas', price: 1300, stock: 20, minStock: 3,
+                        barcode: '7791234567893', image: '' },
+                    { id: 5, name: 'Papas snack', cat: 'Snacks', price: 1700, stock: 15, minStock: 3,
+                        barcode: '7791234567894', image: '' },
+                    { id: 6, name: 'Cigarrillos', cat: 'Tabaco', price: 4000, stock: 10, minStock: 3,
+                        barcode: '7791234567895', image: '' },
+                    { id: 7, name: 'Helado palito', cat: 'Helados', price: 1800, stock: 12, minStock: 3,
+                        barcode: '7791234567896', image: '' }
+                ],
+                sales: [],
+                moves: [],
+                scans: []
+            };
+        }
+
+        function save() {
+            localStorage.setItem(KEY, JSON.stringify(data));
+            renderAll();
+        }
+
+        /* ========================================
+           QR & URL
+        ======================================== */
+        function showLocalUrl() {
+            const url = window.location.href;
+            const el = document.getElementById('localUrl');
+            if (el) el.textContent = url;
+        }
+
+        function copyUrl() {
+            const url = window.location.href;
+            navigator.clipboard.writeText(url).then(() => {
+                showToast('✅ URL copiada', 'success');
+            }).catch(() => {
+                const input = document.createElement('input');
+                input.value = url;
+                document.body.appendChild(input);
+                input.select();
+                document.execCommand('copy');
+                document.body.removeChild(input);
+                showToast('✅ URL copiada', 'success');
+            });
+        }
+
+        function shareUrl() {
+            const url = window.location.href;
+            if (navigator.share) {
+                navigator.share({ title: 'A220 - Gestión', text: '📱 Abrí esta URL en tu celular', url: url });
+            } else {
+                copyUrl();
+            }
+        }
+
+        function generateQR() {
+            const url = window.location.href;
+            const container = document.getElementById('qrContainer');
+            if (!container) return;
+
+            const img = document.createElement('img');
+            img.src =
+                `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}&bgcolor=ffffff&color=0f172a`;
+            img.alt = 'QR Code';
+            img.style.width = '160px';
+            img.style.height = '160px';
+            img.style.borderRadius = '8px';
+            img.onload = () => {
+                container.innerHTML = '';
+                container.appendChild(img);
+            };
+            img.onerror = () => {
+                container.innerHTML =
+                    `<div style="padding:20px;background:var(--bg);border-radius:8px;font-size:12px;word-break:break-all;">${url}</div>`;
+            };
+        }
+
+        /* ========================================
+           FORMATS
+        ======================================== */
+        function money(n) {
+            return '$' + Number(n || 0).toLocaleString('es-AR', { minimumFractionDigits: 0 });
+        }
+
+        function todayStr() {
+            return new Date().toLocaleDateString('es-AR');
+        }
+
+        function dateTimeStr() {
+            return new Date().toLocaleDateString('es-AR') + ' ' + new Date().toLocaleTimeString('es-AR');
+        }
+
+        /* ========================================
+           NAV
+        ======================================== */
+        function show(id, btn) {
+            document.querySelectorAll('.view').forEach(x => x.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('nav button').forEach(x => x.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderAll();
+            if (id === 'sync') {
+                generateQR();
+                showLocalUrl();
+                loadGitHubConfig();
+            }
+        }
+
+        /* ========================================
+           DASHBOARD
+        ======================================== */
+        function renderDashboard() {
+            const today = todayStr();
+            const todays = data.sales.filter(s => s.date.startsWith(today));
+            const total = todays.reduce((a, s) => a + s.total, 0);
+            const units = todays.reduce((a, s) => a + s.items.reduce((b, i) => b + i.qty, 0), 0);
+
+            document.getElementById('dVentas').textContent = money(total);
+            document.getElementById('dProductos').textContent = data.products ? data.products.length : 0;
+            document.getElementById('dBajo').textContent = data.products ? data.products.filter(p => p.stock <= p.minStock)
+                .length : 0;
+            document.getElementById('dUnidades').textContent = units;
+
+            const low = data.products ? data.products.filter(p => p.stock <= p.minStock) : [];
+            document.getElementById('alertas').innerHTML = low.length ?
+                low.map(p => `<div class="stock-low">⚠️ ${p.name}: ${p.stock} uds</div>`).join('') :
+                'Sin alertas.';
+
+            const catSales = {};
+            if (data.sales) {
+                data.sales.forEach(s => {
+                    s.items.forEach(i => {
+                        const p = data.products ? data.products.find(x => x.id === i.id) : null;
+                        const cat = p ? p.cat : 'Otros';
+                        catSales[cat] = (catSales[cat] || 0) + i.total;
+                    });
+                });
+            }
+            const sorted = Object.entries(catSales).sort((a, b) => b[1] - a[1]);
+            document.getElementById('categorySummary').innerHTML = sorted.length ?
+                sorted.map(([cat, total]) =>
+                    `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--border);">
+                        <span>${cat}</span> <strong>${money(total)}</strong>
+                    </div>`
+                ).join('') :
+                'Sin ventas.';
+        }
+
+        /* ========================================
+           PRODUCTS
+        ======================================== */
+        function renderProducts() {
+            const search = document.getElementById('productSearch') ? document.getElementById('productSearch').value
+                .toLowerCase().trim() : '';
+
+            let filtered = data.products ? data.products.filter(p => {
+                const matchName = p.name.toLowerCase().includes(search);
+                const matchBarcode = p.barcode && p.barcode.includes(search);
+                return matchName || matchBarcode;
+            }) : [];
+
+            document.getElementById('productTable').innerHTML = filtered.map(p => `
+                <tr>
+                    <td><strong>${p.name}</strong></td>
+                    <td><span class="badge badge-info">${p.cat}</span></td>
+                    <td>${money(p.price)}</td>
+                    <td class="${p.stock <= p.minStock ? 'stock-low' : 'stock-ok'}">${p.stock}</td>
+                    <td><span class="barcode-badge">${p.barcode || '—'}</span></td>
+                    <td>${p.image ? `<img src="${p.image}" style="width:40px;height:40px;object-fit:cover;border-radius:4px;">` : '—'}</td>
+                    <td>
+                        <button class="btn btn-accent btn-xs" onclick="quickSell(${p.id})"><i class="fas fa-cart-plus"></i></button>
+                        <button class="btn btn-primary btn-xs" onclick="editProduct(${p.id})"><i class="fas fa-edit"></i></button>
+                        <button class="btn btn-danger btn-xs" onclick="deleteProduct(${p.id})"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--text-light);">No hay productos</td></tr>';
+
+            // Actualizar select de productos
+            renderSelect();
+            updateProductPreview();
+        }
+
+        /* ========================================
+           PRODUCT PREVIEW (NUEVO)
+        ======================================== */
+        function updateProductPreview() {
+            const select = document.getElementById('saleProduct');
+            const productId = parseInt(select.value);
+            const product = data.products.find(p => p.id === productId);
+            const preview = document.getElementById('productPreview');
+
+            if (product) {
+                preview.classList.add('has-product');
+                document.getElementById('previewName').textContent = product.name;
+                document.getElementById('previewPrice').textContent = money(product.price);
+                const stockEl = document.getElementById('previewStock');
+                stockEl.textContent = `Stock: ${product.stock}`;
+                stockEl.className = 'stock' + (product.stock <= product.minStock ? ' low' : '');
+
+                const imgContainer = document.getElementById('productImage');
+                if (product.image) {
+                    imgContainer.innerHTML = `<img src="${product.image}" alt="${product.name}">`;
+                } else {
+                    imgContainer.innerHTML = `<i class="fas fa-cube"></i>`;
+                }
+                selectedProductId = product.id;
+            } else {
+                preview.classList.remove('has-product');
+                document.getElementById('previewName').textContent = 'Seleccioná un producto';
+                document.getElementById('previewPrice').textContent = '$0';
+                document.getElementById('previewStock').textContent = 'Stock: 0';
+                document.getElementById('previewStock').className = 'stock';
+                document.getElementById('productImage').innerHTML = `<i class="fas fa-cube"></i>`;
+                selectedProductId = null;
+            }
+        }
+
+        /* ========================================
+           QUANTITY SELECTOR (NUEVO)
+        ======================================== */
+        let currentQty = 1;
+
+        function adjustQty(delta) {
+            currentQty = Math.max(1, currentQty + delta);
+            document.getElementById('saleQtyDisplay').textContent = currentQty;
+            document.getElementById('saleQty').value = currentQty;
+        }
+
+        /* ========================================
+           SELECT
+        ======================================== */
+        function renderSelect() {
+            const select = document.getElementById('saleProduct');
+            if (!select) return;
+            const currentVal = select.value;
+            select.innerHTML = data.products.map(p =>
+                `<option value="${p.id}">${p.name} — ${money(p.price)} — stock ${p.stock}</option>`
+            ).join('');
+            if (currentVal) select.value = currentVal;
+            setSalePrice();
+        }
+
+        function setSalePrice() {
+            const p = data.products ? data.products.find(x => x.id == document.getElementById('saleProduct').value) : null;
+            if (p) document.getElementById('salePrice').value = p.price;
+        }
+        document.getElementById('saleProduct').onchange = function() {
+            setSalePrice();
+            updateProductPreview();
+        };
+
+        /* ========================================
+           ADD PRODUCT
+        ======================================== */
+        function addProduct() {
+            const name = document.getElementById('pName').value.trim();
+            const cat = document.getElementById('pCat').value.trim() || 'General';
+            const price = Number(document.getElementById('pPrice').value);
+            const stock = Number(document.getElementById('pStock').value);
+            const minStock = Number(document.getElementById('pMinStock').value) || 3;
+            const barcode = document.getElementById('pBarcode').value.trim();
+            const image = document.getElementById('pImage').value.trim();
+
+            if (!name || price < 0 || stock < 0) {
+                showToast('Completá los datos', 'error');
+                return;
+            }
+
+            if (!data.products) data.products = [];
+
+            data.products.push({
+                id: Date.now(),
+                name,
+                cat,
+                price,
+                stock,
+                minStock,
+                barcode: barcode || 'BAR' + Date.now().toString().slice(-8),
+                image: image || ''
+            });
+
+            document.getElementById('pName').value = '';
+            document.getElementById('pCat').value = '';
+            document.getElementById('pPrice').value = '';
+            document.getElementById('pStock').value = '';
+            document.getElementById('pMinStock').value = '3';
+            document.getElementById('pBarcode').value = '';
+            document.getElementById('pImage').value = '';
+
+            save();
+            showToast('✅ Producto agregado', 'success');
+            playBeep();
+        }
+
+        function editProduct(id) {
+            if (!data.products) return;
+            const p = data.products.find(x => x.id === id);
+            if (!p) return;
+            const name = prompt('Nombre:', p.name);
+            if (name === null) return;
+            const cat = prompt('Categoría:', p.cat) || 'General';
+            const price = Number(prompt('Precio:', p.price));
+            const stock = Number(prompt('Stock:', p.stock));
+            const minStock = Number(prompt('Stock mínimo:', p.minStock));
+            const barcode = prompt('Código de barras:', p.barcode || '');
+            const image = prompt('URL de imagen:', p.image || '');
+
+            if (isNaN(price) || isNaN(stock) || isNaN(minStock)) {
+                showToast('Valores inválidos', 'error');
+                return;
+            }
+
+            p.name = name.trim();
+            p.cat = cat.trim();
+            p.price = price;
+            p.stock = stock;
+            p.minStock = minStock;
+            p.barcode = barcode || p.barcode;
+            p.image = image || p.image;
+            save();
+            showToast('✅ Producto actualizado', 'success');
+        }
+
+        function deleteProduct(id) {
+            if (!data.products) return;
+            if (!confirm('¿Eliminar este producto?')) return;
+            data.products = data.products.filter(p => p.id !== id);
+            save();
+            showToast('Producto eliminado', 'success');
+        }
+
+        /* ========================================
+           SCANNER
+        ======================================== */
+        let scannerRunning = false;
+        let scanDebounce = false;
+        let currentFacingMode = 'environment';
+        let torchOn = false;
+
+        function startScanner() {
+            const container = document.getElementById('scannerContainer');
+            container.classList.add('active');
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                document.getElementById('scannerStatus').innerHTML = '❌ No se puede acceder a la cámara';
+                showToast('❌ Sin acceso a la cámara', 'error');
+                return;
+            }
+
+            document.getElementById('scannerStatus').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando cámara...';
+
+            const view = document.querySelector('#scannerView');
+            view.innerHTML = '<div class="scanner-overlay"></div>';
+
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector('#scannerView'),
+                    constraints: {
+                        facingMode: currentFacingMode,
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
+                        aspectRatio: { ideal: 4 / 3 }
+                    }
+                },
+                locator: {
+                    patchSize: "medium",
+                    halfSample: true
+                },
+                decoder: {
+                    readers: [
+                        "ean_reader",
+                        "ean_8_reader",
+                        "code_128_reader",
+                        "code_39_reader",
+                        "code_93_reader",
+                        "codabar_reader",
+                        "upc_reader",
+                        "upc_e_reader",
+                        "i2of5_reader"
+                    ],
+                    multiple: false
+                },
+                locate: true
+            }, function(err) {
+                if (err) {
+                    document.getElementById('scannerStatus').innerHTML = '❌ Error: ' + err.message;
+                    showToast('❌ Error al iniciar cámara', 'error');
+                    console.error('Error Quagga:', err);
+                    return;
+                }
+                Quagga.start();
+                scannerRunning = true;
+                document.getElementById('scannerStatus').innerHTML =
+                    '<i class="fas fa-camera"></i> <span class="highlight">Apuntá al código de barras</span>';
+                showToast('📷 Cámara iniciada', 'success');
+            });
+
+            Quagga.onDetected(function(result) {
+                if (scanDebounce) return;
+                scanDebounce = true;
+
+                const code = result.codeResult.code;
+                document.getElementById('scannerStatus').innerHTML =
+                    '✅ Código: <span class="highlight">' + code + '</span>';
+
+                flashScreen();
+                playBeep();
+
+                if (!data.products) data.products = [];
+                const product = data.products.find(p => p.barcode === code);
+
+                if (product) {
+                    // Seleccionar el producto automáticamente
+                    document.getElementById('saleProduct').value = product.id;
+                    updateProductPreview();
+                    setSalePrice();
+
+                    // Resetear cantidad
+                    currentQty = 1;
+                    document.getElementById('saleQtyDisplay').textContent = '1';
+                    document.getElementById('saleQty').value = '1';
+
+                    showToast('📷 Producto encontrado: ' + product.name, 'success');
+
+                    if (!data.scans) data.scans = [];
+                    data.scans.unshift({
+                        date: dateTimeStr(),
+                        barcode: code,
+                        product: product.name
+                    });
+                    save();
+
+                    const log = document.getElementById('scanLog');
+                    if (log) {
+                        const div = document.createElement('div');
+                        div.innerHTML =
+                            `<span>✅ ${product.name}</span> <span class="time">${dateTimeStr()}</span>`;
+                        log.prepend(div);
+                        if (log.children.length > 20) log.removeChild(log.lastChild);
+                    }
+
+                    // Auto-agregar al carrito con la cantidad seleccionada
+                    const qty = parseInt(document.getElementById('saleQty').value) || 1;
+                    if (product.stock >= qty) {
+                        const existing = cart.find(item => item.id === product.id);
+                        if (existing) {
+                            existing.qty += qty;
+                            existing.total = existing.qty * existing.price;
+                        } else {
+                            cart.push({
+                                id: product.id,
+                                name: product.name,
+                                qty: qty,
+                                price: product.price,
+                                total: qty * product.price
+                            });
+                        }
+                        renderCart();
+                        showToast(`📦 ${qty}x ${product.name} agregado al carrito`, 'success');
+                    } else {
+                        showToast('⚠️ Stock insuficiente de ' + product.name, 'error');
+                        playErrorBeep();
+                    }
+
+                    // Cerrar el escáner automáticamente después de 1.5 segundos
+                    setTimeout(() => {
+                        stopScanner();
+                    }, 1500);
+
+                } else {
+                    showToast('⚠️ Producto no encontrado: ' + code, 'error');
+                    playErrorBeep();
+
+                    if (!data.scans) data.scans = [];
+                    data.scans.unshift({
+                        date: dateTimeStr(),
+                        barcode: code,
+                        product: '❌ No encontrado'
+                    });
+                    save();
+                }
+
+                setTimeout(() => { scanDebounce = false; }, 1500);
+            });
+        }
+
+        function stopScanner() {
+            if (scannerRunning) {
+                try {
+                    Quagga.stop();
+                } catch (e) {}
+                scannerRunning = false;
+            }
+            document.getElementById('scannerContainer').classList.remove('active');
+            document.querySelector('#scannerView').innerHTML = '';
+            document.getElementById('scannerStatus').innerHTML = '<i class="fas fa-camera"></i> Apuntá al código de barras';
+        }
+
+        function toggleTorch() {
+            torchOn = !torchOn;
+            showToast(torchOn ? '🔦 Linterna ON' : '🔦 Linterna OFF', 'info');
+            try {
+                const track = Quagga.CameraAccess.getActiveStream().getVideoTracks()[0];
+                if (track && track.getCapabilities && track.getCapabilities().torch) {
+                    track.applyConstraints({ advanced: [{ torch: torchOn }] });
+                }
+            } catch (e) {
+                console.log('Linterna no soportada');
+            }
+        }
+
+        function switchCamera() {
+            currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+            showToast('🔄 Cambiando cámara...', 'info');
+            if (scannerRunning) {
+                stopScanner();
+                setTimeout(() => startScanner(), 300);
+            }
+        }
+
+        window.addEventListener('beforeunload', function() {
+            if (scannerRunning) {
+                try { Quagga.stop(); } catch (e) {}
+            }
+        });
+
+        /* ========================================
+           CART
+        ======================================== */
+        function addSale() {
+            const productId = parseInt(document.getElementById('saleProduct').value);
+            const qty = parseInt(document.getElementById('saleQty').value) || 1;
+            const price = Number(document.getElementById('salePrice').value);
+
+            if (!data.products) data.products = [];
+            const p = data.products.find(x => x.id === productId);
+
+            if (!p || qty < 1 || qty > p.stock) {
+                showToast('Cantidad inválida o stock insuficiente', 'error');
+                return;
+            }
+
+            const existing = cart.find(item => item.id === p.id);
+            if (existing) {
+                existing.qty += qty;
+                existing.total = existing.qty * existing.price;
+            } else {
+                cart.push({ id: p.id, name: p.name, qty: qty, price: price, total: qty * price });
+            }
+            renderCart();
+            showToast(`${qty}x ${p.name} agregado`, 'success');
+            playBeep();
+
+            // Resetear cantidad
+            currentQty = 1;
+            document.getElementById('saleQtyDisplay').textContent = '1';
+            document.getElementById('saleQty').value = '1';
+        }
+
+        function renderCart() {
+            document.getElementById('cart').innerHTML = cart.map((i, n) => `
+                <tr>
+                    <td>${i.name}</td>
+                    <td>${i.qty}</td>
+                    <td>${money(i.price)}</td>
+                    <td>${money(i.total)}</td>
+                    <td><button class="btn btn-danger btn-xs" onclick="cart.splice(${n},1);renderCart()"><i class="fas fa-times"></i></button></td>
+                </tr>
+            `).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--text-light);">Carrito vacío</td></tr>';
+
+            document.getElementById('saleTotal').textContent = money(cart.reduce((a, i) => a + i.total, 0));
+        }
+
+        function finishSale() {
+            if (!cart.length) {
+                showToast('No hay productos', 'error');
+                return;
+            }
+
+            const now = dateTimeStr();
+            const total = cart.reduce((a, i) => a + i.total, 0);
+
+            if (!data.products) data.products = [];
+            if (!data.moves) data.moves = [];
+            if (!data.sales) data.sales = [];
+
+            cart.forEach(i => {
+                const p = data.products.find(x => x.id === i.id);
+                if (p) p.stock -= i.qty;
+                data.moves.unshift({ date: now, product: i.name, qty: i.qty, total: i.total });
+            });
+
+            data.sales.unshift({ date: now, total, items: [...cart] });
+            cart = [];
+            save();
+            showToast(`💰 Venta registrada: ${money(total)}`, 'success');
+            playBeep();
+        }
+
+        function quickSell(id) {
+            if (!data.products) data.products = [];
+            const p = data.products.find(x => x.id === id);
+            if (!p) return;
+            const qty = Number(prompt(`Cantidad de "${p.name}" (stock: ${p.stock}):`, 1));
+            if (!qty || qty < 1 || qty > p.stock) {
+                showToast('Cantidad inválida', 'error');
+                return;
+            }
+
+            const total = qty * p.price;
+            const now = dateTimeStr();
+
+            if (!data.moves) data.moves = [];
+            if (!data.sales) data.sales = [];
+
+            p.stock -= qty;
+            data.moves.unshift({ date: now, product: p.name, qty, total });
+            data.sales.unshift({ date: now, total, items: [{ id: p.id, name: p.name, qty, price: p.price, total }] });
+
+            save();
+            showToast(`Venta rápida: ${qty}x ${p.name} = ${money(total)}`, 'success');
+            playBeep();
+        }
+
+        /* ========================================
+           MOVEMENTS
+        ======================================== */
+        function renderMoves() {
+            if (!data.moves) data.moves = [];
+            document.getElementById('moves').innerHTML = data.moves.map(m => `
+                <tr>
+                    <td>${m.date}</td>
+                    <td>${m.product}</td>
+                    <td>${m.qty}</td>
+                    <td>${money(m.total)}</td>
+                </tr>
+            `).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--text-light);">No hay movimientos</td></tr>';
+        }
+
+        /* ========================================
+           CLOCK
+        ======================================== */
+        setInterval(() => {
+            document.getElementById('clock').textContent = dateTimeStr();
+        }, 1000);
+
+        /* ========================================
+           RENDER ALL
+        ======================================== */
+        function renderAll() {
+            if (!isLoggedIn) return;
+            renderDashboard();
+            renderProducts();
+            renderSelect();
+            renderCart();
+            renderMoves();
+            updateProductPreview();
+        }
+
+        /* ========================================
+           INIT
+        ======================================== */
+        loadData();
+        document.getElementById('clock').textContent = dateTimeStr();
+
+        setTimeout(() => {
+            if (isLoggedIn) {
+                generateQR();
+                showLocalUrl();
+                loadGitHubConfig();
+            }
+        }, 500);
+
+        console.log('🚀 A220 - Sistema de Gestión con GitHub');
+        console.log('🔑 Contraseña: Lujoci10$$$');
+        console.log('📱 URL:', window.location.href);
+        console.log('📤 Subí tus datos a GitHub para compartirlos');
+        console.log('📥 Descargá desde GitHub para traer los datos');
+        console.log('🖼️ Agregá imágenes a los productos');
+        console.log('➕ Usá los botones + y - para la cantidad');
+    </script>
+
+</body>
+</html>
