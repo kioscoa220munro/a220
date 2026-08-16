@@ -1,967 +1,1548 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A 220 | Gestión</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--p:#0f172a;--a:#f59e0b;--b:#f1f5f9;--c:#fff;--t:#0f172a;--l:#64748b;--e:#e2e8f0;--r:16px;--s:10px;--h:0 10px 40px rgba(0,0,0,0.06)}
-[data-theme=dark]{--b:#0f172a;--c:#1e293b;--t:#f1f5f9;--l:#94a3b8;--e:#334155}
-body{font-family:-apple-system,sans-serif;background:var(--b);color:var(--t);transition:.3s;min-height:100vh}
-#L{position:fixed;inset:0;background:rgba(15,23,42,0.85);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;z-index:9999}
-#L.hidden{display:none}
-.B{background:var(--c);padding:48px 40px;border-radius:var(--r);width:100%;max-width:400px;text-align:center}
-.B .br{font-size:36px;font-weight:900;color:var(--p)}.B .br span{color:var(--a)}
-.B .su{color:var(--l);font-size:14px;margin:8px 0 28px}
-.B input{width:100%;padding:14px;border:2px solid var(--e);border-radius:var(--s);font-size:15px;margin-bottom:14px;background:var(--b);color:var(--t);text-align:center;letter-spacing:4px}
-.B input:focus{outline:none;border-color:var(--a)}
-.B .btn{width:100%;padding:14px;background:var(--a);color:var(--p);font-weight:700;font-size:16px;border:none;border-radius:var(--s);cursor:pointer}
-.B .btn:hover{background:#d97706}
-.B .er{color:#ef4444;font-size:14px;margin-top:10px}
-header{background:var(--p);color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
-header .br{font-size:22px;font-weight:900}header .br span{color:var(--a)}
-.h-r{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.h-r #cl{font-size:13px;color:#cbd5e1}
-nav{display:flex;gap:3px;padding:8px 16px;background:var(--c);border-bottom:1px solid var(--e);flex-wrap:wrap}
-nav button{border:none;border-radius:var(--s);padding:8px 14px;cursor:pointer;font-weight:600;background:transparent;color:var(--l);font-size:13px;display:flex;align-items:center;gap:6px}
-nav button:hover{background:var(--b);color:var(--t)}
-nav button.active{background:var(--p);color:#fff}
-nav button.active i{color:var(--a)}
-main{padding:16px 20px;max-width:1280px;margin:auto}
-.v{display:none}.v.active{display:block}
-.v h2{font-size:20px;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:10px}
-.v h2 i{color:var(--a)}
-.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:18px}
-.card{background:var(--c);border-radius:var(--r);padding:16px 18px;box-shadow:var(--h);border:1px solid var(--e)}
-.card .l{font-size:12px;color:var(--l);font-weight:500}
-.card .n{font-size:26px;font-weight:900;margin-top:2px}
-.panel{background:var(--c);border-radius:var(--r);padding:16px 20px;margin-top:14px;box-shadow:var(--h);border:1px solid var(--e)}
-.panel h3{font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
-.panel h3 i{color:var(--a)}
-.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:12px}
-.fg label{font-size:12px;font-weight:600;color:var(--l);display:block;margin-bottom:3px}
-.fg input,.fg select{width:100%;padding:8px 12px;border:2px solid var(--e);border-radius:var(--s);font-size:13px;background:var(--b);color:var(--t)}
-.fg input:focus{border-color:var(--a)}
-.btn{border:none;border-radius:var(--s);padding:8px 16px;cursor:pointer;font-weight:700;font-size:13px;transition:.3s;display:inline-flex;align-items:center;gap:6px}
-.btn:hover{transform:translateY(-2px)}
-.btn-p{background:var(--p);color:#fff}
-.btn-p:hover{background:#1e293b}
-.btn-a{background:var(--a);color:var(--p)}
-.btn-a:hover{background:#d97706}
-.btn-d{background:#ef4444;color:#fff}
-.btn-d:hover{background:#dc2626}
-.btn-s{background:#22c55e;color:#fff}
-.btn-s:hover{background:#16a34a}
-.btn-i{background:#3b82f6;color:#fff}
-.btn-i:hover{background:#2563eb}
-.btn-o{background:transparent;border:2px solid var(--e);color:var(--t)}
-.btn-o:hover{border-color:var(--a)}
-.btn-xs{padding:3px 8px;font-size:10px;border-radius:4px}
-.tw{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{padding:8px 10px;text-align:left;border-bottom:1px solid var(--e)}
-th{background:var(--b);font-weight:700;font-size:11px;text-transform:uppercase;color:var(--l)}
-.bdg{display:inline-block;padding:1px 10px;border-radius:20px;font-size:11px;font-weight:700}
-.bdg-i{background:#dbeafe;color:#1e40af}
-.sl{color:#b91c1c;font-weight:800}
-.so{color:#15803d;font-weight:700}
-.tot{font-size:24px;font-weight:900;text-align:right;margin:12px 0;padding:12px 16px;background:var(--b);border-radius:var(--s);border:2px solid var(--e)}
-.tot span{color:var(--a)}
-.tc{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px}
-.toast{background:var(--p);color:#fff;padding:10px 18px;border-radius:var(--s);box-shadow:0 20px 60px rgba(0,0,0,0.10);animation:slideUp .4s ease;font-weight:500;display:flex;align-items:center;gap:10px;border-left:4px solid var(--a);max-width:380px;font-size:13px}
-.toast i{font-size:18px;color:var(--a)}
-.toast.error{border-left-color:#ef4444}.toast.error i{color:#ef4444}
-.toast.success{border-left-color:#22c55e}.toast.success i{color:#22c55e}
-#S{position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.95);display:none;flex-direction:column;align-items:center;justify-content:center;padding:16px}
-#S.active{display:flex}
-#S #SV{width:100%;max-width:500px;aspect-ratio:4/3;background:#000;border-radius:var(--r);overflow:hidden;position:relative;border:3px solid var(--a)}
-#S #SV video{width:100%;height:100%;object-fit:cover}
-#S .so{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:70%;height:50%;border:3px dashed rgba(245,158,11,0.6);border-radius:12px;pointer-events:none;box-shadow:0 0 0 9999px rgba(0,0,0,0.5)}
-#S .sc{margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
-#S .ss{color:#fff;font-size:14px;margin-top:10px;text-align:center;background:rgba(0,0,0,0.6);padding:6px 16px;border-radius:var(--s)}
-#S .ss .hl{color:var(--a);font-weight:700}
-.sbtn{background:#22c55e;color:#fff;padding:8px 16px;border:none;border-radius:var(--s);font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:13px}
-.sbtn:hover{background:#16a34a}
-.pp{display:flex;gap:16px;align-items:center;background:var(--b);border-radius:var(--s);padding:12px 16px;margin-bottom:12px;border:2px solid var(--e)}
-.pp .pi{width:70px;height:70px;border-radius:var(--s);background:var(--c);display:flex;align-items:center;justify-content:center;font-size:30px;color:var(--l);border:1px solid var(--e);overflow:hidden;flex-shrink:0}
-.pp .pi img{width:100%;height:100%;object-fit:cover}
-.pp .info{flex:1}
-.pp .info .nm{font-weight:700;font-size:16px}
-.pp .info .pr{font-size:18px;font-weight:800;color:var(--a)}
-.pp .info .st{font-size:12px;color:var(--l)}
-.qs{display:flex;align-items:center;gap:8px;margin:8px 0}
-.qs button{width:36px;height:36px;border-radius:50%;border:none;font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.qs .mn{background:var(--b);color:var(--t)}
-.qs .mn:hover{background:#ef4444;color:#fff}
-.qs .pl{background:var(--a);color:var(--p)}
-.qs .pl:hover{background:#d97706}
-.qs .qv{font-size:22px;font-weight:800;min-width:40px;text-align:center}
-.sl{max-height:200px;overflow-y:auto;font-size:12px;margin-top:8px}
-.sl div{padding:4px 8px;border-bottom:1px solid var(--e);display:flex;justify-content:space-between}
-.sl .tm{color:var(--l);font-size:10px}
-.bb{background:var(--b);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:10px;color:var(--l)}
-@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-@media(max-width:768px){header{padding:10px 14px}nav{padding:6px 10px}nav button{padding:6px 10px;font-size:11px}main{padding:10px 12px}.cards{grid-template-columns:1fr 1fr}.B{padding:28px 16px}.fg{grid-template-columns:1fr}.panel{padding:12px 14px}.pp{flex-direction:column;text-align:center}.pp .pi{width:100px;height:100px}}
-@media(max-width:480px){.cards{grid-template-columns:1fr}}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A 220 | Gestión</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js">
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        /* ===== TODO EL CSS (COMPLETO) ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --p: #0f172a;
+            --a: #f59e0b;
+            --b: #f1f5f9;
+            --c: #ffffff;
+            --t: #0f172a;
+            --l: #64748b;
+            --e: #e2e8f0;
+            --r: 16px;
+            --s: 10px;
+            --h: 0 10px 40px rgba(0, 0, 0, 0.06);
+        }
+        [data-theme=dark] {
+            --b: #0f172a;
+            --c: #1e293b;
+            --t: #f1f5f9;
+            --l: #94a3b8;
+            --e: #334155;
+        }
+        body {
+            font-family: -apple-system, sans-serif;
+            background: var(--b);
+            color: var(--t);
+            transition: .3s;
+            min-height: 100vh;
+        }
+        #L {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        #L.hidden {
+            display: none;
+        }
+        .B {
+            background: var(--c);
+            padding: 48px 40px;
+            border-radius: var(--r);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .B .br {
+            font-size: 36px;
+            font-weight: 900;
+            color: var(--p);
+        }
+        .B .br span {
+            color: var(--a);
+        }
+        .B .su {
+            color: var(--l);
+            font-size: 14px;
+            margin: 8px 0 28px;
+        }
+        .B input {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid var(--e);
+            border-radius: var(--s);
+            font-size: 15px;
+            margin-bottom: 14px;
+            background: var(--b);
+            color: var(--t);
+            text-align: center;
+            letter-spacing: 4px;
+        }
+        .B input:focus {
+            outline: none;
+            border-color: var(--a);
+        }
+        .B .btn {
+            width: 100%;
+            padding: 14px;
+            background: var(--a);
+            color: var(--p);
+            font-weight: 700;
+            font-size: 16px;
+            border: none;
+            border-radius: var(--s);
+            cursor: pointer;
+        }
+        .B .btn:hover {
+            background: #d97706;
+        }
+        .B .er {
+            color: #ef4444;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        header {
+            background: var(--p);
+            color: #fff;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        header .br {
+            font-size: 22px;
+            font-weight: 900;
+        }
+        header .br span {
+            color: var(--a);
+        }
+        .h-r {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .h-r #cl {
+            font-size: 13px;
+            color: #cbd5e1;
+        }
+        nav {
+            display: flex;
+            gap: 3px;
+            padding: 8px 16px;
+            background: var(--c);
+            border-bottom: 1px solid var(--e);
+            flex-wrap: wrap;
+        }
+        nav button {
+            border: none;
+            border-radius: var(--s);
+            padding: 8px 14px;
+            cursor: pointer;
+            font-weight: 600;
+            background: transparent;
+            color: var(--l);
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        nav button:hover {
+            background: var(--b);
+            color: var(--t);
+        }
+        nav button.active {
+            background: var(--p);
+            color: #fff;
+        }
+        nav button.active i {
+            color: var(--a);
+        }
+        main {
+            padding: 16px 20px;
+            max-width: 1280px;
+            margin: auto;
+        }
+        .v {
+            display: none;
+        }
+        .v.active {
+            display: block;
+        }
+        .v h2 {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .v h2 i {
+            color: var(--a);
+        }
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .card {
+            background: var(--c);
+            border-radius: var(--r);
+            padding: 16px 18px;
+            box-shadow: var(--h);
+            border: 1px solid var(--e);
+        }
+        .card .l {
+            font-size: 12px;
+            color: var(--l);
+            font-weight: 500;
+        }
+        .card .n {
+            font-size: 26px;
+            font-weight: 900;
+            margin-top: 2px;
+        }
+        .panel {
+            background: var(--c);
+            border-radius: var(--r);
+            padding: 16px 20px;
+            margin-top: 14px;
+            box-shadow: var(--h);
+            border: 1px solid var(--e);
+        }
+        .panel h3 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .panel h3 i {
+            color: var(--a);
+        }
+        .fg {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        .fg label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--l);
+            display: block;
+            margin-bottom: 3px;
+        }
+        .fg input,
+        .fg select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 2px solid var(--e);
+            border-radius: var(--s);
+            font-size: 13px;
+            background: var(--b);
+            color: var(--t);
+        }
+        .fg input:focus {
+            border-color: var(--a);
+        }
+        .btn {
+            border: none;
+            border-radius: var(--s);
+            padding: 8px 16px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 13px;
+            transition: .3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn-p {
+            background: var(--p);
+            color: #fff;
+        }
+        .btn-p:hover {
+            background: #1e293b;
+        }
+        .btn-a {
+            background: var(--a);
+            color: var(--p);
+        }
+        .btn-a:hover {
+            background: #d97706;
+        }
+        .btn-d {
+            background: #ef4444;
+            color: #fff;
+        }
+        .btn-d:hover {
+            background: #dc2626;
+        }
+        .btn-s {
+            background: #22c55e;
+            color: #fff;
+        }
+        .btn-s:hover {
+            background: #16a34a;
+        }
+        .btn-i {
+            background: #3b82f6;
+            color: #fff;
+        }
+        .btn-i:hover {
+            background: #2563eb;
+        }
+        .btn-o {
+            background: transparent;
+            border: 2px solid var(--e);
+            color: var(--t);
+        }
+        .btn-o:hover {
+            border-color: var(--a);
+        }
+        .btn-xs {
+            padding: 3px 8px;
+            font-size: 10px;
+            border-radius: 4px;
+        }
+        .tw {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        th,
+        td {
+            padding: 8px 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--e);
+        }
+        th {
+            background: var(--b);
+            font-weight: 700;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: var(--l);
+        }
+        .bdg {
+            display: inline-block;
+            padding: 1px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+        .bdg-i {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .sl {
+            color: #b91c1c;
+            font-weight: 800;
+        }
+        .so {
+            color: #15803d;
+            font-weight: 700;
+        }
+        .tot {
+            font-size: 24px;
+            font-weight: 900;
+            text-align: right;
+            margin: 12px 0;
+            padding: 12px 16px;
+            background: var(--b);
+            border-radius: var(--s);
+            border: 2px solid var(--e);
+        }
+        .tot span {
+            color: var(--a);
+        }
+        .tc {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .toast {
+            background: var(--p);
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: var(--s);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.10);
+            animation: slideUp .4s ease;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid var(--a);
+            max-width: 380px;
+            font-size: 13px;
+        }
+        .toast i {
+            font-size: 18px;
+            color: var(--a);
+        }
+        .toast.error {
+            border-left-color: #ef4444;
+        }
+        .toast.error i {
+            color: #ef4444;
+        }
+        .toast.success {
+            border-left-color: #22c55e;
+        }
+        .toast.success i {
+            color: #22c55e;
+        }
+        #S {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        #S.active {
+            display: flex;
+        }
+        #S #SV {
+            width: 100%;
+            max-width: 500px;
+            aspect-ratio: 4/3;
+            background: #000;
+            border-radius: var(--r);
+            overflow: hidden;
+            position: relative;
+            border: 3px solid var(--a);
+        }
+        #S #SV video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        #S .so {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            height: 50%;
+            border: 3px dashed rgba(245, 158, 11, 0.6);
+            border-radius: 12px;
+            pointer-events: none;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
+        }
+        #S .sc {
+            margin-top: 16px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        #S .ss {
+            color: #fff;
+            font-size: 14px;
+            margin-top: 10px;
+            text-align: center;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 6px 16px;
+            border-radius: var(--s);
+        }
+        #S .ss .hl {
+            color: var(--a);
+            font-weight: 700;
+        }
+        .sbtn {
+            background: #22c55e;
+            color: #fff;
+            padding: 8px 16px;
+            border: none;
+            border-radius: var(--s);
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+        .sbtn:hover {
+            background: #16a34a;
+        }
+        .pp {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            background: var(--b);
+            border-radius: var(--s);
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            border: 2px solid var(--e);
+        }
+        .pp .pi {
+            width: 70px;
+            height: 70px;
+            border-radius: var(--s);
+            background: var(--c);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: var(--l);
+            border: 1px solid var(--e);
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        .pp .pi img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .pp .info {
+            flex: 1;
+        }
+        .pp .info .nm {
+            font-weight: 700;
+            font-size: 16px;
+        }
+        .pp .info .pr {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--a);
+        }
+        .pp .info .st {
+            font-size: 12px;
+            color: var(--l);
+        }
+        .qs {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 8px 0;
+        }
+        .qs button {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            font-size: 18px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .qs .mn {
+            background: var(--b);
+            color: var(--t);
+        }
+        .qs .mn:hover {
+            background: #ef4444;
+            color: #fff;
+        }
+        .qs .pl {
+            background: var(--a);
+            color: var(--p);
+        }
+        .qs .pl:hover {
+            background: #d97706;
+        }
+        .qs .qv {
+            font-size: 22px;
+            font-weight: 800;
+            min-width: 40px;
+            text-align: center;
+        }
+        .sl {
+            max-height: 200px;
+            overflow-y: auto;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+        .sl div {
+            padding: 4px 8px;
+            border-bottom: 1px solid var(--e);
+            display: flex;
+            justify-content: space-between;
+        }
+        .sl .tm {
+            color: var(--l);
+            font-size: 10px;
+        }
+        .bb {
+            background: var(--b);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 10px;
+            color: var(--l);
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @media(max-width:768px) {
+            header {
+                padding: 10px 14px;
+            }
+            nav {
+                padding: 6px 10px;
+            }
+            nav button {
+                padding: 6px 10px;
+                font-size: 11px;
+            }
+            main {
+                padding: 10px 12px;
+            }
+            .cards {
+                grid-template-columns: 1fr 1fr;
+            }
+            .B {
+                padding: 28px 16px;
+            }
+            .fg {
+                grid-template-columns: 1fr;
+            }
+            .panel {
+                padding: 12px 14px;
+            }
+            .pp {
+                flex-direction: column;
+                text-align: center;
+            }
+            .pp .pi {
+                width: 100px;
+                height: 100px;
+            }
+        }
+        @media(max-width:480px) {
+            .cards {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
 
-<!-- LOGIN -->
-<div id="L">
-  <div class="B">
-    <div class="br">A <span>220</span></div>
-    <div class="su">Sistema de Gestión</div>
-    <input type="password" id="loginPass" placeholder="Contraseña">
-    <button class="btn" onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> Ingresar</button>
-    <div class="er" id="loginError"></div>
-    <div style="margin-top:14px;font-size:11px;color:var(--l);"><i class="fas fa-lock"></i> Ingresá la contraseña</div>
-  </div>
-</div>
-
-<!-- SCANNER -->
-<div id="S">
-  <div id="SV"><div class="so"></div></div>
-  <div class="ss" id="scannerStatus"><i class="fas fa-camera"></i> Apuntá al código</div>
-  <div class="sc">
-    <button class="btn btn-d" onclick="stopScanner()"><i class="fas fa-times"></i> Cerrar</button>
-    <button class="btn btn-a" onclick="toggleTorch()"><i class="fas fa-lightbulb"></i> Linterna</button>
-  </div>
-</div>
-
-<!-- TOASTS -->
-<div class="tc" id="toastContainer"></div>
-
-<!-- HEADER -->
-<header>
-  <div><div class="br">A <span>220</span></div><div class="su">Gestión · Kiosco</div></div>
-  <div class="h-r">
-    <div id="clock"></div>
-    <button class="btn btn-o btn-sm" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
-  </div>
-</header>
-
-<!-- NAV -->
-<nav>
-  <button class="active" onclick="showView('inicio',this)"><i class="fas fa-chart-pie"></i> Inicio</button>
-  <button onclick="showView('ventas',this)"><i class="fas fa-cart-plus"></i> Ventas</button>
-  <button onclick="showView('productos',this)"><i class="fas fa-boxes"></i> Productos</button>
-  <button onclick="showView('movimientos',this)"><i class="fas fa-history"></i> Movimientos</button>
-  <button onclick="showView('sync',this)"><i class="fas fa-sync"></i> Sincronizar</button>
-</nav>
-
-<!-- MAIN -->
-<main>
-
-<!-- INICIO -->
-<section id="inicio" class="v active">
-  <h2><i class="fas fa-chart-pie"></i> Panel</h2>
-  <div class="cards">
-    <div class="card"><div class="l"><i class="fas fa-dollar-sign"></i> Ventas hoy</div><div class="n" id="dVentas">$0</div></div>
-    <div class="card"><div class="l"><i class="fas fa-box"></i> Productos</div><div class="n" id="dProductos">0</div></div>
-    <div class="card"><div class="l"><i class="fas fa-exclamation-triangle"></i> Stock bajo</div><div class="n" id="dBajo">0</div></div>
-    <div class="card"><div class="l"><i class="fas fa-shopping-bag"></i> Unidades</div><div class="n" id="dUnidades">0</div></div>
-  </div>
-  <div class="panel"><h3><i class="fas fa-bell"></i> Alertas</h3><div id="alertas">Sin alertas.</div></div>
-  <div class="panel"><h3><i class="fas fa-chart-bar"></i> Ventas por categoría</h3><div id="categorySummary">Cargando...</div></div>
-</section>
-
-<!-- VENTAS -->
-<section id="ventas" class="v">
-  <h2><i class="fas fa-cart-plus"></i> Nueva venta</h2>
-  <div class="panel">
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-      <button class="sbtn" onclick="startScanner()"><i class="fas fa-camera"></i> 📷 Escanear</button>
+    <!-- ===== LOGIN ===== -->
+    <div id="L">
+        <div class="B">
+            <div class="br">A <span>220</span></div>
+            <div class="su">Sistema de Gestión</div>
+            <input type="password" id="loginPass" placeholder="Contraseña">
+            <button class="btn" onclick="doLogin()"><i class="fas fa-sign-in-alt"></i> Ingresar</button>
+            <div class="er" id="loginError"></div>
+            <div style="margin-top:14px;font-size:11px;color:var(--l);"><i class="fas fa-lock"></i> Ingresá la contraseña</div>
+        </div>
     </div>
-    <div style="margin-bottom:12px;">
-      <label style="font-size:12px;font-weight:600;color:var(--l);display:block;margin-bottom:4px;">Producto</label>
-      <select id="saleProduct" onchange="updatePreview()" style="width:100%;padding:10px 12px;border:2px solid var(--e);border-radius:var(--s);font-size:14px;background:var(--b);color:var(--t);"></select>
+
+    <!-- ===== SCANNER ===== -->
+    <div id="S">
+        <div id="SV"><div class="so"></div></div>
+        <div class="ss" id="scannerStatus"><i class="fas fa-camera"></i> Apuntá al código</div>
+        <div class="sc">
+            <button class="btn btn-d" onclick="stopScanner()"><i class="fas fa-times"></i> Cerrar</button>
+            <button class="btn btn-a" onclick="toggleTorch()"><i class="fas fa-lightbulb"></i> Linterna</button>
+        </div>
     </div>
-    <div class="pp" id="productPreview">
-      <div class="pi" id="productImage"><i class="fas fa-cube"></i></div>
-      <div class="info">
-        <div class="nm" id="previewName">Seleccioná un producto</div>
-        <div class="pr" id="previewPrice">$0</div>
-        <div class="st" id="previewStock">Stock: 0</div>
-      </div>
-    </div>
-    <div style="margin-bottom:12px;">
-      <label style="font-size:12px;font-weight:600;color:var(--l);display:block;margin-bottom:4px;">Cantidad</label>
-      <div class="qs">
-        <button class="mn" onclick="adjustQty(-1)"><i class="fas fa-minus"></i></button>
-        <span class="qv" id="qtyDisplay">1</span>
-        <button class="pl" onclick="adjustQty(1)"><i class="fas fa-plus"></i></button>
-      </div>
-      <input type="hidden" id="saleQty" value="1">
-    </div>
-    <div style="margin-bottom:12px;">
-      <label style="font-size:12px;font-weight:600;color:var(--l);display:block;margin-bottom:4px;">Precio</label>
-      <input id="salePrice" type="number" min="0" step="0.01" style="width:100%;padding:10px 12px;border:2px solid var(--e);border-radius:var(--s);font-size:14px;background:var(--b);color:var(--t);">
-    </div>
-    <button class="btn btn-a" onclick="addToCart()" style="width:100%;justify-content:center;padding:12px;"><i class="fas fa-plus"></i> Agregar</button>
-  </div>
-  <div class="panel">
-    <h3><i class="fas fa-shopping-cart"></i> Carrito</h3>
-    <div class="tw"><table><thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th><th></th></tr></thead><tbody id="cart"></tbody></table></div>
-    <div class="tot">Total: <span id="cartTotal">$0</span></div>
-    <button class="btn btn-s" onclick="finishSale()" style="width:100%;justify-content:center;padding:12px;"><i class="fas fa-check"></i> Cobrar</button>
-  </div>
-  <div class="panel"><h3><i class="fas fa-qrcode"></i> Últimos escaneos</h3><div class="sl" id="scanLog"><div style="color:var(--l);text-align:center;padding:12px;">Sin escaneos</div></div></div>
-</section>
 
-<!-- PRODUCTOS -->
-<section id="productos" class="v">
-  <h2><i class="fas fa-boxes"></i> Productos</h2>
-  <div class="panel">
-    <h3><i class="fas fa-plus-circle"></i> Agregar</h3>
-    <div class="fg">
-      <div><label>Nombre</label><input id="pName" placeholder="Ej. Yerba 500g"></div>
-      <div><label>Categoría</label><input id="pCat" placeholder="Ej. Almacén" value="General"></div>
-      <div><label>Precio</label><input id="pPrice" type="number" step="0.01"></div>
-      <div><label>Stock</label><input id="pStock" type="number" min="0"></div>
-      <div><label>Stock mínimo</label><input id="pMinStock" type="number" min="0" value="3"></div>
-      <div><label>Código barras</label><div style="display:flex;gap:6px;"><input id="pBarcode" placeholder="Ej. 7791234567890" style="flex:1;"><button class="btn btn-o btn-sm" onclick="document.getElementById('pBarcode').value='BAR'+Date.now().toString().slice(-8)"><i class="fas fa-random"></i></button></div></div>
-      <div><label>URL imagen</label><input id="pImage" placeholder="https://ejemplo.com/producto.jpg"></div>
-    </div>
-    <button class="btn btn-p" onclick="addProduct()"><i class="fas fa-save"></i> Guardar</button>
-  </div>
-  <div class="panel">
-    <div style="margin-bottom:12px;"><input id="productSearch" placeholder="🔍 Buscar..." oninput="renderProducts()" style="width:100%;padding:8px 12px;border:2px solid var(--e);border-radius:var(--s);background:var(--b);color:var(--t);"></div>
-    <div class="tw"><table><thead><tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Código</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody id="productTable"></tbody></table></div>
-  </div>
-</section>
+    <!-- ===== TOASTS ===== -->
+    <div class="tc" id="toastContainer"></div>
 
-<!-- MOVIMIENTOS -->
-<section id="movimientos" class="v">
-  <h2><i class="fas fa-history"></i> Movimientos</h2>
-  <div class="panel"><div class="tw"><table><thead><tr><th>Fecha</th><th>Producto</th><th>Cantidad</th><th>Total</th></tr></thead><tbody id="moves"></tbody></table></div></div>
-</section>
+    <!-- ===== HEADER ===== -->
+    <header>
+        <div><div class="br">A <span>220</span></div><div class="su">Gestión · Kiosco</div></div>
+        <div class="h-r">
+            <div id="clock"></div>
+            <button class="btn btn-o btn-sm" onclick="toggleTheme()"><i class="fas fa-moon"></i></button>
+        </div>
+    </header>
 
-<!-- SYNC -->
-<section id="sync" class="v">
-  <h2><i class="fas fa-sync"></i> Sincronizar</h2>
-  <div class="panel"><h3><i class="fas fa-github"></i> Configuración</h3>
-    <div class="fg">
-      <div><label>Usuario GitHub</label><input id="githubUser" placeholder="tu-usuario"></div>
-      <div><label>Repositorio</label><input id="githubRepo" placeholder="a220-data" value="a220-data"></div>
-      <div><label>Token</label><input id="githubToken" placeholder="ghp_xxxxx" type="password"></div>
-    </div>
-    <button class="btn btn-p" onclick="saveGitHubConfig()"><i class="fas fa-save"></i> Guardar</button>
-  </div>
-  <div class="panel"><h3><i class="fas fa-arrows-rotate"></i> Acciones</h3>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
-      <button class="btn btn-s" onclick="syncToGitHub()"><i class="fas fa-upload"></i> Subir</button>
-      <button class="btn btn-i" onclick="syncFromGitHub()"><i class="fas fa-download"></i> Descargar</button>
-    </div>
-    <div id="syncLog" style="margin-top:12px;font-size:12px;color:var(--l);border-top:1px solid var(--e);padding-top:10px;max-height:150px;overflow-y:auto;"><div>📡 Configurá GitHub</div></div>
-  </div>
-</section>
+    <!-- ===== NAV ===== -->
+    <nav>
+        <button class="active" onclick="showView('inicio',this)"><i class="fas fa-chart-pie"></i> Inicio</button>
+        <button onclick="showView('ventas',this)"><i class="fas fa-cart-plus"></i> Ventas</button>
+        <button onclick="showView('productos',this)"><i class="fas fa-boxes"></i> Productos</button>
+        <button onclick="showView('movimientos',this)"><i class="fas fa-history"></i> Movimientos</button>
+        <button onclick="showView('sync',this)"><i class="fas fa-sync"></i> Sincronizar</button>
+    </nav>
 
-</main>
+    <!-- ===== MAIN ===== -->
+    <main>
 
-<script>
-// ============================================
-// CONTRASEÑA
-// ============================================
-const PASSWORD = 'Lujoci10$$$';
-let isLoggedIn = false;
+        <!-- ===== INICIO ===== -->
+        <section id="inicio" class="v active">
+            <h2><i class="fas fa-chart-pie"></i> Panel</h2>
+            <div class="cards">
+                <div class="card"><div class="l"><i class="fas fa-dollar-sign"></i> Ventas hoy</div><div class="n" id="dVentas">$0</div></div>
+                <div class="card"><div class="l"><i class="fas fa-box"></i> Productos</div><div class="n" id="dProductos">0</div></div>
+                <div class="card"><div class="l"><i class="fas fa-exclamation-triangle"></i> Stock bajo</div><div class="n" id="dBajo">0</div></div>
+                <div class="card"><div class="l"><i class="fas fa-shopping-bag"></i> Unidades</div><div class="n" id="dUnidades">0</div></div>
+            </div>
+            <div class="panel"><h3><i class="fas fa-bell"></i> Alertas</h3><div id="alertas">Sin alertas.</div></div>
+            <div class="panel"><h3><i class="fas fa-chart-bar"></i> Ventas por categoría</h3><div id="categorySummary">Cargando...</div></div>
+        </section>
 
-// ============================================
-// TEMA OSCURO (CORREGIDO)
-// ============================================
-let darkMode = localStorage.getItem('a220_theme') === 'dark';
+        <!-- ===== VENTAS ===== -->
+        <section id="ventas" class="v">
+            <h2><i class="fas fa-cart-plus"></i> Nueva venta</h2>
+            <div class="panel">
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+                    <button class="sbtn" onclick="startScanner()"><i class="fas fa-camera"></i> 📷 Escanear</button>
+                </div>
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:12px;font-weight:600;color:var(--l);display:block;margin-bottom:4px;">Producto</label>
+                    <select id="saleProduct" onchange="updatePreview()" style="width:100%;padding:10px 12px;border:2px solid var(--e);border-radius:var(--s);font-size:14px;background:var(--b);color:var(--t);"></select>
+                </div>
+                <div class="pp" id="productPreview">
+                    <div class="pi" id="productImage"><i class="fas fa-cube"></i></div>
+                    <div class="info">
+                        <div class="nm" id="previewName">Seleccioná un producto</div>
+                        <div class="pr" id="previewPrice">$0</div>
+                        <div class="st" id="previewStock">Stock: 0</div>
+                    </div>
+                </div>
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:12px;font-weight:600;color:var(--l);display:block;margin-bottom:4px;">Cantidad</label>
+                    <div class="qs">
+                        <button class="mn" onclick="adjustQty(-1)"><i class="fas fa-minus"></i></button>
+                        <span class="qv" id="qtyDisplay">1</span>
+                        <button class="pl" onclick="adjustQty(1)"><i class="fas fa-plus"></i></button>
+                    </div>
+                    <input type="hidden" id="saleQty" value="1">
+                </div>
+                <div style="margin-bottom:12px;">
+                    <label style="font-size:12px;font-weight:600;color:var(--l);display:block;margin-bottom:4px;">Precio</label>
+                    <input id="salePrice" type="number" min="0" step="0.01" style="width:100%;padding:10px 12px;border:2px solid var(--e);border-radius:var(--s);font-size:14px;background:var(--b);color:var(--t);">
+                </div>
+                <button class="btn btn-a" onclick="addToCart()" style="width:100%;justify-content:center;padding:12px;"><i class="fas fa-plus"></i> Agregar</button>
+            </div>
+            <div class="panel">
+                <h3><i class="fas fa-shopping-cart"></i> Carrito</h3>
+                <div class="tw"><table><thead><tr><th>Producto</th><th>Cant.</th><th>Precio</th><th>Subtotal</th><th></th></tr></thead><tbody id="cart"></tbody></table></div>
+                <div class="tot">Total: <span id="cartTotal">$0</span></div>
+                <button class="btn btn-s" onclick="finishSale()" style="width:100%;justify-content:center;padding:12px;"><i class="fas fa-check"></i> Cobrar</button>
+            </div>
+            <div class="panel"><h3><i class="fas fa-qrcode"></i> Últimos escaneos</h3><div class="sl" id="scanLog"><div style="color:var(--l);text-align:center;padding:12px;">Sin escaneos</div></div></div>
+        </section>
 
-function toggleTheme() {
-  darkMode = !darkMode;
-  localStorage.setItem('a220_theme', darkMode ? 'dark' : 'light');
-  document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
-  const icon = document.querySelector('.theme-toggle i');
-  if (icon) {
-    icon.className = darkMode ? 'fas fa-sun' : 'fas fa-moon';
-  }
-}
+        <!-- ===== PRODUCTOS ===== -->
+        <section id="productos" class="v">
+            <h2><i class="fas fa-boxes"></i> Productos</h2>
+            <div class="panel">
+                <h3><i class="fas fa-plus-circle"></i> Agregar</h3>
+                <div class="fg">
+                    <div><label>Nombre</label><input id="pName" placeholder="Ej. Yerba 500g"></div>
+                    <div><label>Categoría</label><input id="pCat" placeholder="Ej. Almacén" value="General"></div>
+                    <div><label>Precio</label><input id="pPrice" type="number" step="0.01"></div>
+                    <div><label>Stock</label><input id="pStock" type="number" min="0"></div>
+                    <div><label>Stock mínimo</label><input id="pMinStock" type="number" min="0" value="3"></div>
+                    <div><label>Código barras</label><div style="display:flex;gap:6px;"><input id="pBarcode" placeholder="Ej. 7791234567890" style="flex:1;"><button class="btn btn-o btn-sm" onclick="document.getElementById('pBarcode').value='BAR'+Date.now().toString().slice(-8)"><i class="fas fa-random"></i></button></div></div>
+                    <div><label>URL imagen</label><input id="pImage" placeholder="https://ejemplo.com/producto.jpg"></div>
+                </div>
+                <button class="btn btn-p" onclick="addProduct()"><i class="fas fa-save"></i> Guardar</button>
+            </div>
+            <div class="panel">
+                <div style="margin-bottom:12px;"><input id="productSearch" placeholder="🔍 Buscar..." oninput="renderProducts()" style="width:100%;padding:8px 12px;border:2px solid var(--e);border-radius:var(--s);background:var(--b);color:var(--t);"></div>
+                <div class="tw"><table><thead><tr><th>Producto</th><th>Categoría</th><th>Precio</th><th>Stock</th><th>Código</th><th>Imagen</th><th>Acciones</th></tr></thead><tbody id="productTable"></tbody></table></div>
+            </div>
+        </section>
 
-// Aplicar tema al cargar
-document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+        <!-- ===== MOVIMIENTOS ===== -->
+        <section id="movimientos" class="v">
+            <h2><i class="fas fa-history"></i> Movimientos</h2>
+            <div class="panel"><div class="tw"><table><thead><tr><th>Fecha</th><th>Producto</th><th>Cantidad</th><th>Total</th></tr></thead><tbody id="moves"></tbody></table></div></div>
+        </section>
 
-// ============================================
-// TOAST
-// ============================================
-function showToast(msg, type) {
-  const c = document.getElementById('toastContainer');
-  if (!c) return;
-  const icons = {success:'fa-check-circle', error:'fa-exclamation-circle', info:'fa-info-circle'};
-  const t = document.createElement('div');
-  t.className = 'toast ' + (type || 'info');
-  t.innerHTML = '<i class="fas ' + (icons[type] || icons.info) + '"></i> ' + msg;
-  c.appendChild(t);
-  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
-}
+        <!-- ===== SYNC ===== -->
+        <section id="sync" class="v">
+            <h2><i class="fas fa-sync"></i> Sincronizar</h2>
+            <div class="panel"><h3><i class="fas fa-github"></i> Configuración</h3>
+                <div class="fg">
+                    <div><label>Usuario GitHub</label><input id="githubUser" placeholder="tu-usuario" value="kioscoa220munro"></div>
+                    <div><label>Repositorio</label><input id="githubRepo" placeholder="a220-data" value="a220-data"></div>
+                    <div><label>Token</label><input id="githubToken" placeholder="ghp_xxxxx" type="password"></div>
+                </div>
+                <button class="btn btn-p" onclick="saveGitHubConfig()"><i class="fas fa-save"></i> Guardar</button>
+            </div>
+            <div class="panel"><h3><i class="fas fa-arrows-rotate"></i> Acciones</h3>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+                    <button class="btn btn-s" onclick="syncToGitHub()"><i class="fas fa-upload"></i> Subir</button>
+                    <button class="btn btn-i" onclick="syncFromGitHub()"><i class="fas fa-download"></i> Descargar</button>
+                </div>
+                <div id="syncLog" style="margin-top:12px;font-size:12px;color:var(--l);border-top:1px solid var(--e);padding-top:10px;max-height:150px;overflow-y:auto;"><div>📡 Configurá GitHub</div></div>
+            </div>
+        </section>
 
-// ============================================
-// SONIDO
-// ============================================
-function playBeep() {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.frequency.value = 800;
-    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.15);
-  } catch(e) {}
-}
+    </main>
 
-// ============================================
-// DATA
-// ============================================
-const KEY = 'a220_data_v3';
-let data = { products: [], sales: [], moves: [], scans: [] };
-let cart = [];
-let currentQty = 1;
+    <script>
+        // ============================================
+        // CONTRASEÑA (en el código)
+        // ============================================
+        const PASSWORD = 'Lujoci10$$$';
+        let isLoggedIn = false;
 
-function getDefaultData() {
-  return {
-    products: [
-      {id:1, name:'Agua 500 ml', cat:'Bebidas', price:1200, stock:24, minStock:3, barcode:'7791234567890', image:''},
-      {id:2, name:'Gaseosa', cat:'Bebidas', price:1800, stock:18, minStock:3, barcode:'7791234567891', image:''},
-      {id:3, name:'Yerba 500g', cat:'Almacén', price:3500, stock:10, minStock:3, barcode:'7791234567892', image:''},
-      {id:4, name:'Alfajor', cat:'Golosinas', price:1300, stock:20, minStock:3, barcode:'7791234567893', image:''},
-      {id:5, name:'Papas snack', cat:'Snacks', price:1700, stock:15, minStock:3, barcode:'7791234567894', image:''},
-      {id:6, name:'Cigarrillos', cat:'Tabaco', price:4000, stock:10, minStock:3, barcode:'7791234567895', image:''},
-      {id:7, name:'Helado palito', cat:'Helados', price:1800, stock:12, minStock:3, barcode:'7791234567896', image:''}
-    ],
-    sales: [],
-    moves: [],
-    scans: []
-  };
-}
+        // ============================================
+        // TEMA OSCURO
+        // ============================================
+        let darkMode = localStorage.getItem('a220_theme') === 'dark';
 
-function loadData() {
-  try {
-    const saved = localStorage.getItem(KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      data = parsed;
-      if (!data.products) data.products = [];
-      if (!data.sales) data.sales = [];
-      if (!data.moves) data.moves = [];
-      if (!data.scans) data.scans = [];
-    } else {
-      data = getDefaultData();
-    }
-  } catch(e) {
-    data = getDefaultData();
-  }
-}
+        function toggleTheme() {
+            darkMode = !darkMode;
+            localStorage.setItem('a220_theme', darkMode ? 'dark' : 'light');
+            document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+            const icon = document.querySelector('.theme-toggle i');
+            if (icon) {
+                icon.className = darkMode ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+        document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
 
-function save() {
-  try {
-    localStorage.setItem(KEY, JSON.stringify(data));
-    renderAll();
-  } catch(e) {
-    showToast('❌ Error al guardar: ' + e.message, 'error');
-  }
-}
+        // ============================================
+        // TOAST
+        // ============================================
+        function showToast(msg, type) {
+            const c = document.getElementById('toastContainer');
+            if (!c) return;
+            const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
+            const t = document.createElement('div');
+            t.className = 'toast ' + (type || 'info');
+            t.innerHTML = '<i class="fas ' + (icons[type] || icons.info) + '"></i> ' + msg;
+            c.appendChild(t);
+            setTimeout(() => { t.style.opacity = '0';
+                setTimeout(() => t.remove(), 300); }, 3000);
+        }
 
-// ============================================
-// FORMATOS
-// ============================================
-function money(n) {
-  return '$' + Number(n || 0).toLocaleString('es-AR', {minimumFractionDigits:0});
-}
+        // ============================================
+        // SONIDO
+        // ============================================
+        function playBeep() {
+            try {
+                const ctx = new(window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = 800;
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.15);
+            } catch (e) {}
+        }
 
-function todayStr() {
-  return new Date().toLocaleDateString('es-AR');
-}
+        // ============================================
+        // DATA
+        // ============================================
+        const KEY = 'a220_data_v3';
+        let data = { products: [], sales: [], moves: [], scans: [] };
+        let cart = [];
+        let currentQty = 1;
 
-function dateTimeStr() {
-  return new Date().toLocaleDateString('es-AR') + ' ' + new Date().toLocaleTimeString('es-AR');
-}
+        function getDefaultData() {
+            return {
+                products: [
+                    { id: 1, name: 'Agua 500 ml', cat: 'Bebidas', price: 1200, stock: 24, minStock: 3,
+                    barcode: '7791234567890', image: '' },
+                    { id: 2, name: 'Gaseosa', cat: 'Bebidas', price: 1800, stock: 18, minStock: 3,
+                    barcode: '7791234567891', image: '' },
+                    { id: 3, name: 'Yerba 500g', cat: 'Almacén', price: 3500, stock: 10, minStock: 3,
+                    barcode: '7791234567892', image: '' },
+                    { id: 4, name: 'Alfajor', cat: 'Golosinas', price: 1300, stock: 20, minStock: 3,
+                    barcode: '7791234567893', image: '' },
+                    { id: 5, name: 'Papas snack', cat: 'Snacks', price: 1700, stock: 15, minStock: 3,
+                    barcode: '7791234567894', image: '' },
+                    { id: 6, name: 'Cigarrillos', cat: 'Tabaco', price: 4000, stock: 10, minStock: 3,
+                    barcode: '7791234567895', image: '' },
+                    { id: 7, name: 'Helado palito', cat: 'Helados', price: 1800, stock: 12, minStock: 3,
+                    barcode: '7791234567896', image: '' }
+                ],
+                sales: [],
+                moves: [],
+                scans: []
+            };
+        }
 
-// ============================================
-// LOGIN
-// ============================================
-function doLogin() {
-  const pass = document.getElementById('loginPass').value.trim();
-  const error = document.getElementById('loginError');
-  
-  if (!pass) {
-    error.textContent = 'Ingresá la contraseña';
-    return;
-  }
-  
-  if (pass === PASSWORD) {
-    isLoggedIn = true;
-    document.getElementById('L').classList.add('hidden');
-    loadData();
-    renderAll();
-    showToast('✅ ¡Bienvenido!', 'success');
-  } else {
-    error.textContent = '❌ Contraseña incorrecta';
-    document.getElementById('loginPass').value = '';
-  }
-}
+        function loadData() {
+            try {
+                const saved = localStorage.getItem(KEY);
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    data = parsed;
+                    if (!data.products) data.products = [];
+                    if (!data.sales) data.sales = [];
+                    if (!data.moves) data.moves = [];
+                    if (!data.scans) data.scans = [];
+                } else {
+                    data = getDefaultData();
+                }
+            } catch (e) {
+                data = getDefaultData();
+            }
+        }
 
-document.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && !document.getElementById('L').classList.contains('hidden')) {
-    doLogin();
-  }
-});
+        function save() {
+            try {
+                localStorage.setItem(KEY, JSON.stringify(data));
+                renderAll();
+            } catch (e) {
+                showToast('❌ Error al guardar: ' + e.message, 'error');
+            }
+        }
 
-// ============================================
-// NAVEGACIÓN
-// ============================================
-function showView(id, btn) {
-  document.querySelectorAll('.v').forEach(x => x.classList.remove('active'));
-  const el = document.getElementById(id);
-  if (el) el.classList.add('active');
-  document.querySelectorAll('nav button').forEach(x => x.classList.remove('active'));
-  if (btn) btn.classList.add('active');
-  if (isLoggedIn) renderAll();
-}
+        // ============================================
+        // FORMATOS
+        // ============================================
+        function money(n) {
+            return '$' + Number(n || 0).toLocaleString('es-AR', { minimumFractionDigits: 0 });
+        }
 
-// ============================================
-// DASHBOARD
-// ============================================
-function renderDashboard() {
-  if (!data || !data.products) return;
-  const today = todayStr();
-  const todays = data.sales.filter(s => s.date && s.date.startsWith(today));
-  const total = todays.reduce((a, s) => a + (s.total || 0), 0);
-  const units = todays.reduce((a, s) => a + (s.items ? s.items.reduce((b, i) => b + (i.qty || 0), 0) : 0), 0);
-  
-  const dV = document.getElementById('dVentas');
-  const dP = document.getElementById('dProductos');
-  const dB = document.getElementById('dBajo');
-  const dU = document.getElementById('dUnidades');
-  if (dV) dV.textContent = money(total);
-  if (dP) dP.textContent = data.products.length;
-  if (dB) dB.textContent = data.products.filter(p => p.stock <= p.minStock).length;
-  if (dU) dU.textContent = units;
-  
-  const low = data.products.filter(p => p.stock <= p.minStock);
-  const alertas = document.getElementById('alertas');
-  if (alertas) {
-    alertas.innerHTML = low.length ? low.map(p => '<div class="sl">⚠️ ' + p.name + ': ' + p.stock + ' uds</div>').join('') : 'Sin alertas.';
-  }
-  
-  const catSales = {};
-  data.sales.forEach(s => {
-    if (s.items) {
-      s.items.forEach(i => {
-        const p = data.products.find(x => x.id === i.id);
-        const cat = p ? p.cat : 'Otros';
-        catSales[cat] = (catSales[cat] || 0) + (i.total || 0);
-      });
-    }
-  });
-  const sorted = Object.entries(catSales).sort((a,b) => b[1] - a[1]);
-  const cs = document.getElementById('categorySummary');
-  if (cs) {
-    cs.innerHTML = sorted.length ? sorted.map(([cat,total]) => '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--e);"><span>' + cat + '</span> <strong>' + money(total) + '</strong></div>').join('') : 'Sin ventas.';
-  }
-}
+        function todayStr() {
+            return new Date().toLocaleDateString('es-AR');
+        }
 
-// ============================================
-// PRODUCTOS
-// ============================================
-function renderProducts() {
-  if (!data || !data.products) return;
-  const search = document.getElementById('productSearch');
-  const searchVal = search ? search.value.toLowerCase().trim() : '';
-  const filtered = data.products.filter(p => p.name.toLowerCase().includes(searchVal) || (p.barcode && p.barcode.includes(searchVal)));
-  
-  const table = document.getElementById('productTable');
-  if (!table) return;
-  table.innerHTML = filtered.map(p => 
-    '<tr><td><strong>' + p.name + '</strong></td><td><span class="bdg bdg-i">' + p.cat + '</span></td><td>' + money(p.price) + '</td><td class="' + (p.stock <= p.minStock ? 'sl' : 'so') + '">' + p.stock + '</td><td><span class="bb">' + (p.barcode || '—') + '</span></td><td>' + (p.image ? '<img src="' + p.image + '" style="width:40px;height:40px;object-fit:cover;border-radius:4px;">' : '—') + '</td><td><button class="btn btn-a btn-xs" onclick="quickSell(' + p.id + ')"><i class="fas fa-cart-plus"></i></button><button class="btn btn-p btn-xs" onclick="editProduct(' + p.id + ')"><i class="fas fa-edit"></i></button><button class="btn btn-d btn-xs" onclick="deleteProduct(' + p.id + ')"><i class="fas fa-trash"></i></button></td></tr>'
-  ).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--l);">No hay productos</td></tr>';
-  
-  renderSelect();
-  updatePreview();
-}
+        function dateTimeStr() {
+            return new Date().toLocaleDateString('es-AR') + ' ' + new Date().toLocaleTimeString('es-AR');
+        }
 
-function renderSelect() {
-  const sel = document.getElementById('saleProduct');
-  if (!sel) return;
-  const val = sel.value;
-  sel.innerHTML = data.products.map(p => '<option value="' + p.id + '">' + p.name + ' — ' + money(p.price) + ' — stock ' + p.stock + '</option>').join('');
-  if (val) sel.value = val;
-  setPrice();
-}
+        // ============================================
+        // LOGIN
+        // ============================================
+        function doLogin() {
+            const pass = document.getElementById('loginPass').value.trim();
+            const error = document.getElementById('loginError');
 
-function setPrice() {
-  const p = data.products.find(x => x.id == document.getElementById('saleProduct').value);
-  const priceInput = document.getElementById('salePrice');
-  if (p && priceInput) priceInput.value = p.price;
-}
+            if (!pass) {
+                error.textContent = 'Ingresá la contraseña';
+                return;
+            }
 
-function updatePreview() {
-  const id = parseInt(document.getElementById('saleProduct').value);
-  const p = data.products.find(x => x.id === id);
-  const preview = document.getElementById('productPreview');
-  if (!preview) return;
-  
-  if (p) {
-    const nameEl = document.getElementById('previewName');
-    const priceEl = document.getElementById('previewPrice');
-    const stockEl = document.getElementById('previewStock');
-    const imgEl = document.getElementById('productImage');
-    if (nameEl) nameEl.textContent = p.name;
-    if (priceEl) priceEl.textContent = money(p.price);
-    if (stockEl) {
-      stockEl.textContent = 'Stock: ' + p.stock;
-      stockEl.className = 'st' + (p.stock <= p.minStock ? ' low' : '');
-    }
-    if (imgEl) {
-      if (p.image) { imgEl.innerHTML = '<img src="' + p.image + '">'; } 
-      else { imgEl.innerHTML = '<i class="fas fa-cube"></i>'; }
-    }
-  } else {
-    const nameEl = document.getElementById('previewName');
-    const priceEl = document.getElementById('previewPrice');
-    const stockEl = document.getElementById('previewStock');
-    const imgEl = document.getElementById('productImage');
-    if (nameEl) nameEl.textContent = 'Seleccioná un producto';
-    if (priceEl) priceEl.textContent = '$0';
-    if (stockEl) stockEl.textContent = 'Stock: 0';
-    if (imgEl) imgEl.innerHTML = '<i class="fas fa-cube"></i>';
-  }
-}
+            if (pass === PASSWORD) {
+                isLoggedIn = true;
+                document.getElementById('L').classList.add('hidden');
+                loadData();
+                renderAll();
+                showToast('✅ ¡Bienvenido!', 'success');
+            } else {
+                error.textContent = '❌ Contraseña incorrecta';
+                document.getElementById('loginPass').value = '';
+            }
+        }
 
-document.getElementById('saleProduct').onchange = function() {
-  setPrice();
-  updatePreview();
-};
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !document.getElementById('L').classList.contains('hidden')) {
+                doLogin();
+            }
+        });
 
-// ============================================
-// CANTIDAD
-// ============================================
-function adjustQty(delta) {
-  currentQty = Math.max(1, currentQty + delta);
-  const display = document.getElementById('qtyDisplay');
-  const input = document.getElementById('saleQty');
-  if (display) display.textContent = currentQty;
-  if (input) input.value = currentQty;
-}
+        // ============================================
+        // NAVEGACIÓN
+        // ============================================
+        function showView(id, btn) {
+            document.querySelectorAll('.v').forEach(x => x.classList.remove('active'));
+            const el = document.getElementById(id);
+            if (el) el.classList.add('active');
+            document.querySelectorAll('nav button').forEach(x => x.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            if (isLoggedIn) renderAll();
+        }
 
-// ============================================
-// AGREGAR PRODUCTO
-// ============================================
-function addProduct() {
-  const name = document.getElementById('pName').value.trim();
-  const cat = document.getElementById('pCat').value.trim() || 'General';
-  const price = Number(document.getElementById('pPrice').value);
-  const stock = Number(document.getElementById('pStock').value);
-  const minStock = Number(document.getElementById('pMinStock').value) || 3;
-  const barcode = document.getElementById('pBarcode').value.trim();
-  const image = document.getElementById('pImage').value.trim();
-  
-  if (!name || price < 0 || stock < 0) {
-    showToast('Completá los datos', 'error');
-    return;
-  }
-  
-  data.products.push({
-    id: Date.now(),
-    name, cat, price, stock, minStock,
-    barcode: barcode || 'BAR' + Date.now().toString().slice(-8),
-    image: image || ''
-  });
-  
-  document.getElementById('pName').value = '';
-  document.getElementById('pCat').value = '';
-  document.getElementById('pPrice').value = '';
-  document.getElementById('pStock').value = '';
-  document.getElementById('pMinStock').value = '3';
-  document.getElementById('pBarcode').value = '';
-  document.getElementById('pImage').value = '';
-  
-  save();
-  showToast('✅ Producto agregado', 'success');
-  playBeep();
-}
+        // ============================================
+        // DASHBOARD
+        // ============================================
+        function renderDashboard() {
+            if (!data || !data.products) return;
+            const today = todayStr();
+            const todays = data.sales.filter(s => s.date && s.date.startsWith(today));
+            const total = todays.reduce((a, s) => a + (s.total || 0), 0);
+            const units = todays.reduce((a, s) => a + (s.items ? s.items.reduce((b, i) => b + (i.qty || 0), 0) : 0), 0);
 
-function editProduct(id) {
-  const p = data.products.find(x => x.id === id);
-  if (!p) return;
-  const name = prompt('Nombre:', p.name);
-  if (name === null) return;
-  const cat = prompt('Categoría:', p.cat) || 'General';
-  const price = Number(prompt('Precio:', p.price));
-  const stock = Number(prompt('Stock:', p.stock));
-  const minStock = Number(prompt('Stock mínimo:', p.minStock));
-  const barcode = prompt('Código de barras:', p.barcode || '');
-  const image = prompt('URL de imagen:', p.image || '');
-  
-  if (isNaN(price) || isNaN(stock) || isNaN(minStock)) {
-    showToast('Valores inválidos', 'error');
-    return;
-  }
-  
-  p.name = name.trim();
-  p.cat = cat.trim();
-  p.price = price;
-  p.stock = stock;
-  p.minStock = minStock;
-  p.barcode = barcode || p.barcode;
-  p.image = image || p.image;
-  save();
-  showToast('✅ Producto actualizado', 'success');
-}
+            const dV = document.getElementById('dVentas');
+            const dP = document.getElementById('dProductos');
+            const dB = document.getElementById('dBajo');
+            const dU = document.getElementById('dUnidades');
+            if (dV) dV.textContent = money(total);
+            if (dP) dP.textContent = data.products.length;
+            if (dB) dB.textContent = data.products.filter(p => p.stock <= p.minStock).length;
+            if (dU) dU.textContent = units;
 
-function deleteProduct(id) {
-  if (!confirm('¿Eliminar este producto?')) return;
-  data.products = data.products.filter(p => p.id !== id);
-  save();
-  showToast('Producto eliminado', 'success');
-}
+            const low = data.products.filter(p => p.stock <= p.minStock);
+            const alertas = document.getElementById('alertas');
+            if (alertas) {
+                alertas.innerHTML = low.length ? low.map(p => '<div class="sl">⚠️ ' + p.name + ': ' + p.stock +
+                    ' uds</div>').join('') : 'Sin alertas.';
+            }
 
-// ============================================
-// CARRITO
-// ============================================
-function addToCart() {
-  const id = parseInt(document.getElementById('saleProduct').value);
-  const qty = parseInt(document.getElementById('saleQty').value) || 1;
-  const price = Number(document.getElementById('salePrice').value);
-  const p = data.products.find(x => x.id === id);
-  
-  if (!p || qty < 1 || qty > p.stock) {
-    showToast('Cantidad inválida o stock insuficiente', 'error');
-    return;
-  }
-  
-  const existing = cart.find(item => item.id === p.id);
-  if (existing) {
-    existing.qty += qty;
-    existing.total = existing.qty * existing.price;
-  } else {
-    cart.push({ id: p.id, name: p.name, qty, price, total: qty * price });
-  }
-  
-  renderCart();
-  showToast(qty + 'x ' + p.name + ' agregado', 'success');
-  playBeep();
-  currentQty = 1;
-  const display = document.getElementById('qtyDisplay');
-  const input = document.getElementById('saleQty');
-  if (display) display.textContent = '1';
-  if (input) input.value = '1';
-}
+            const catSales = {};
+            data.sales.forEach(s => {
+                if (s.items) {
+                    s.items.forEach(i => {
+                        const p = data.products.find(x => x.id === i.id);
+                        const cat = p ? p.cat : 'Otros';
+                        catSales[cat] = (catSales[cat] || 0) + (i.total || 0);
+                    });
+                }
+            });
+            const sorted = Object.entries(catSales).sort((a, b) => b[1] - a[1]);
+            const cs = document.getElementById('categorySummary');
+            if (cs) {
+                cs.innerHTML = sorted.length ? sorted.map(([cat, total]) =>
+                    '<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--e);"><span>' +
+                    cat + '</span> <strong>' + money(total) + '</strong></div>').join('') : 'Sin ventas.';
+            }
+        }
 
-function renderCart() {
-  const cartEl = document.getElementById('cart');
-  if (!cartEl) return;
-  cartEl.innerHTML = cart.map((i, n) => 
-    '<tr><td>' + i.name + '</td><td>' + i.qty + '</td><td>' + money(i.price) + '</td><td>' + money(i.total) + '</td><td><button class="btn btn-d btn-xs" onclick="removeFromCart(' + n + ')"><i class="fas fa-times"></i></button></td></tr>'
-  ).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--l);">Carrito vacío</td></tr>';
-  
-  const totalEl = document.getElementById('cartTotal');
-  if (totalEl) totalEl.textContent = money(cart.reduce((a, i) => a + i.total, 0));
-}
+        // ============================================
+        // PRODUCTOS
+        // ============================================
+        function renderProducts() {
+            if (!data || !data.products) return;
+            const search = document.getElementById('productSearch');
+            const searchVal = search ? search.value.toLowerCase().trim() : '';
+            const filtered = data.products.filter(p => p.name.toLowerCase().includes(searchVal) || (p.barcode && p.barcode
+                .includes(searchVal)));
 
-function removeFromCart(index) {
-  cart.splice(index, 1);
-  renderCart();
-}
+            const table = document.getElementById('productTable');
+            if (!table) return;
+            table.innerHTML = filtered.map(p =>
+                '<tr><td><strong>' + p.name + '</strong></td><td><span class="bdg bdg-i">' + p.cat +
+                '</span></td><td>' + money(p.price) + '</td><td class="' + (p.stock <= p.minStock ? 'sl' : 'so') +
+                '">' + p.stock + '</td><td><span class="bb">' + (p.barcode || '—') +
+                '</span></td><td>' + (p.image ? '<img src="' + p.image +
+                '" style="width:40px;height:40px;object-fit:cover;border-radius:4px;">' : '—') +
+                '</td><td><button class="btn btn-a btn-xs" onclick="quickSell(' + p.id +
+                ')"><i class="fas fa-cart-plus"></i></button><button class="btn btn-p btn-xs" onclick="editProduct(' +
+                p.id +
+                ')"><i class="fas fa-edit"></i></button><button class="btn btn-d btn-xs" onclick="deleteProduct(' +
+                p.id + ')"><i class="fas fa-trash"></i></button></td></tr>'
+            ).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--l);">No hay productos</td></tr>';
 
-function finishSale() {
-  if (!cart.length) {
-    showToast('No hay productos', 'error');
-    return;
-  }
-  
-  const now = dateTimeStr();
-  const total = cart.reduce((a, i) => a + i.total, 0);
-  
-  cart.forEach(i => {
-    const p = data.products.find(x => x.id === i.id);
-    if (p) p.stock -= i.qty;
-    data.moves.unshift({ date: now, product: i.name, qty: i.qty, total: i.total });
-  });
-  
-  data.sales.unshift({ date: now, total, items: [...cart] });
-  cart = [];
-  save();
-  showToast('💰 Venta registrada: ' + money(total), 'success');
-  playBeep();
-}
+            renderSelect();
+            updatePreview();
+        }
 
-function quickSell(id) {
-  const p = data.products.find(x => x.id === id);
-  if (!p) return;
-  const qty = Number(prompt('Cantidad de "' + p.name + '" (stock: ' + p.stock + '):', 1));
-  if (!qty || qty < 1 || qty > p.stock) {
-    showToast('Cantidad inválida', 'error');
-    return;
-  }
-  
-  const total = qty * p.price;
-  const now = dateTimeStr();
-  p.stock -= qty;
-  data.moves.unshift({ date: now, product: p.name, qty, total });
-  data.sales.unshift({ date: now, total, items: [{ id: p.id, name: p.name, qty, price: p.price, total }] });
-  save();
-  showToast('Venta rápida: ' + qty + 'x ' + p.name + ' = ' + money(total), 'success');
-  playBeep();
-}
+        function renderSelect() {
+            const sel = document.getElementById('saleProduct');
+            if (!sel) return;
+            const val = sel.value;
+            sel.innerHTML = data.products.map(p => '<option value="' + p.id + '">' + p.name + ' — ' + money(p.price) +
+                ' — stock ' + p.stock + '</option>').join('');
+            if (val) sel.value = val;
+            setPrice();
+        }
 
-// ============================================
-// MOVIMIENTOS
-// ============================================
-function renderMoves() {
-  const movesEl = document.getElementById('moves');
-  if (!movesEl) return;
-  movesEl.innerHTML = data.moves.map(m => 
-    '<tr><td>' + m.date + '</td><td>' + m.product + '</td><td>' + m.qty + '</td><td>' + money(m.total) + '</td></tr>'
-  ).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--l);">No hay movimientos</td></tr>';
-}
+        function setPrice() {
+            const p = data.products.find(x => x.id == document.getElementById('saleProduct').value);
+            const priceInput = document.getElementById('salePrice');
+            if (p && priceInput) priceInput.value = p.price;
+        }
 
-// ============================================
-// SCANNER
-// ============================================
-let scannerRunning = false;
-let scanDebounce = false;
-let currentFacing = 'environment';
+        function updatePreview() {
+            const id = parseInt(document.getElementById('saleProduct').value);
+            const p = data.products.find(x => x.id === id);
+            const preview = document.getElementById('productPreview');
+            if (!preview) return;
 
-function startScanner() {
-  const c = document.getElementById('S');
-  if (c) c.classList.add('active');
-  
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    const status = document.getElementById('scannerStatus');
-    if (status) status.innerHTML = '❌ No se puede acceder a la cámara';
-    return;
-  }
-  
-  const status = document.getElementById('scannerStatus');
-  if (status) status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando...';
-  const view = document.querySelector('#SV');
-  if (view) view.innerHTML = '<div class="so"></div>';
-  
-  Quagga.init({
-    inputStream: {
-      name: "Live",
-      type: "LiveStream",
-      target: document.querySelector('#SV'),
-      constraints: { facingMode: currentFacing, width: { ideal: 640 }, height: { ideal: 480 } }
-    },
-    decoder: { readers: ["ean_reader", "ean_8_reader", "code_128_reader", "code_39_reader", "upc_reader"] }
-  }, function(err) {
-    if (err) {
-      if (status) status.innerHTML = '❌ Error';
-      return;
-    }
-    Quagga.start();
-    scannerRunning = true;
-    if (status) status.innerHTML = '<i class="fas fa-camera"></i> Apuntá al código';
-  });
-  
-  Quagga.onDetected(function(result) {
-    if (scanDebounce) return;
-    scanDebounce = true;
-    
-    const code = result.codeResult.code;
-    if (status) status.innerHTML = '✅ Código: ' + code;
-    playBeep();
-    
-    const product = data.products.find(p => p.barcode === code);
-    if (product) {
-      const sel = document.getElementById('saleProduct');
-      if (sel) sel.value = product.id;
-      updatePreview();
-      setPrice();
-      currentQty = 1;
-      const display = document.getElementById('qtyDisplay');
-      const input = document.getElementById('saleQty');
-      if (display) display.textContent = '1';
-      if (input) input.value = '1';
-      
-      const qty = 1;
-      if (product.stock >= qty) {
-        const existing = cart.find(item => item.id === product.id);
-        if (existing) { existing.qty += qty; existing.total = existing.qty * existing.price; }
-        else { cart.push({ id: product.id, name: product.name, qty, price: product.price, total: product.price }); }
-        renderCart();
-        showToast('📷 ' + product.name + ' agregado', 'success');
-      } else {
-        showToast('⚠️ Stock insuficiente', 'error');
-      }
-      
-      data.scans.unshift({ date: dateTimeStr(), barcode: code, product: product.name });
-      save();
-      
-      const log = document.getElementById('scanLog');
-      if (log) {
-        const div = document.createElement('div');
-        div.innerHTML = '<span>✅ ' + product.name + '</span><span class="tm">' + dateTimeStr() + '</span>';
-        log.prepend(div);
-        if (log.children.length > 20) log.removeChild(log.lastChild);
-      }
-      
-      setTimeout(stopScanner, 1500);
-    } else {
-      showToast('⚠️ Producto no encontrado', 'error');
-    }
-    
-    setTimeout(() => { scanDebounce = false; }, 1500);
-  });
-}
+            if (p) {
+                const nameEl = document.getElementById('previewName');
+                const priceEl = document.getElementById('previewPrice');
+                const stockEl = document.getElementById('previewStock');
+                const imgEl = document.getElementById('productImage');
+                if (nameEl) nameEl.textContent = p.name;
+                if (priceEl) priceEl.textContent = money(p.price);
+                if (stockEl) {
+                    stockEl.textContent = 'Stock: ' + p.stock;
+                    stockEl.className = 'st' + (p.stock <= p.minStock ? ' low' : '');
+                }
+                if (imgEl) {
+                    if (p.image) { imgEl.innerHTML = '<img src="' + p.image + '">'; } else { imgEl.innerHTML =
+                            '<i class="fas fa-cube"></i>'; }
+                }
+            } else {
+                const nameEl = document.getElementById('previewName');
+                const priceEl = document.getElementById('previewPrice');
+                const stockEl = document.getElementById('previewStock');
+                const imgEl = document.getElementById('productImage');
+                if (nameEl) nameEl.textContent = 'Seleccioná un producto';
+                if (priceEl) priceEl.textContent = '$0';
+                if (stockEl) stockEl.textContent = 'Stock: 0';
+                if (imgEl) imgEl.innerHTML = '<i class="fas fa-cube"></i>';
+            }
+        }
 
-function stopScanner() {
-  if (scannerRunning) { try { Quagga.stop(); } catch(e) {} scannerRunning = false; }
-  const c = document.getElementById('S');
-  if (c) c.classList.remove('active');
-  const view = document.querySelector('#SV');
-  if (view) view.innerHTML = '';
-  const status = document.getElementById('scannerStatus');
-  if (status) status.innerHTML = '<i class="fas fa-camera"></i> Apuntá al código';
-}
+        document.getElementById('saleProduct').onchange = function() {
+            setPrice();
+            updatePreview();
+        };
 
-function toggleTorch() {
-  showToast('🔦 Linterna', 'info');
-  try {
-    const track = Quagga.CameraAccess.getActiveStream().getVideoTracks()[0];
-    if (track && track.getCapabilities && track.getCapabilities().torch) {
-      const t = !track.getSettings().torch;
-      track.applyConstraints({ advanced: [{ torch: t }] });
-    }
-  } catch(e) {}
-}
+        // ============================================
+        // CANTIDAD
+        // ============================================
+        function adjustQty(delta) {
+            currentQty = Math.max(1, currentQty + delta);
+            const display = document.getElementById('qtyDisplay');
+            const input = document.getElementById('saleQty');
+            if (display) display.textContent = currentQty;
+            if (input) input.value = currentQty;
+        }
 
-// ============================================
-// GITHUB SYNC
-// ============================================
-let githubConfig = { user: '', repo: '', token: '' };
+        // ============================================
+        // AGREGAR PRODUCTO
+        // ============================================
+        function addProduct() {
+            const name = document.getElementById('pName').value.trim();
+            const cat = document.getElementById('pCat').value.trim() || 'General';
+            const price = Number(document.getElementById('pPrice').value);
+            const stock = Number(document.getElementById('pStock').value);
+            const minStock = Number(document.getElementById('pMinStock').value) || 3;
+            const barcode = document.getElementById('pBarcode').value.trim();
+            const image = document.getElementById('pImage').value.trim();
 
-function loadGitHubConfig() {
-  const saved = localStorage.getItem('a220_github_config');
-  if (saved) {
-    try {
-      githubConfig = JSON.parse(saved);
-      const gu = document.getElementById('githubUser');
-      const gr = document.getElementById('githubRepo');
-      const gt = document.getElementById('githubToken');
-      if (gu) gu.value = githubConfig.user || '';
-      if (gr) gr.value = githubConfig.repo || '';
-      if (gt) gt.value = githubConfig.token || '';
-    } catch(e) {}
-  }
-}
+            if (!name || price < 0 || stock < 0) {
+                showToast('Completá los datos', 'error');
+                return;
+            }
 
-function saveGitHubConfig() {
-  const gu = document.getElementById('githubUser');
-  const gr = document.getElementById('githubRepo');
-  const gt = document.getElementById('githubToken');
-  githubConfig.user = gu ? gu.value.trim() : '';
-  githubConfig.repo = gr ? gr.value.trim() : '';
-  githubConfig.token = gt ? gt.value.trim() : '';
-  if (!githubConfig.user || !githubConfig.repo || !githubConfig.token) {
-    showToast('⚠️ Completá todos los campos', 'error');
-    return;
-  }
-  localStorage.setItem('a220_github_config', JSON.stringify(githubConfig));
-  showToast('✅ Configuración guardada', 'success');
-}
+            data.products.push({
+                id: Date.now(),
+                name,
+                cat,
+                price,
+                stock,
+                minStock,
+                barcode: barcode || 'BAR' + Date.now().toString().slice(-8),
+                image: image || ''
+            });
 
-async function syncToGitHub() {
-  if (!githubConfig.user || !githubConfig.repo || !githubConfig.token) {
-    showToast('⚠️ Configurá GitHub primero', 'error');
-    return;
-  }
-  
-  const url = 'https://api.github.com/repos/' + githubConfig.user + '/' + githubConfig.repo + '/contents/a220_data.json';
-  const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
-  
-  try {
-    showToast('📤 Subiendo a GitHub...', 'info');
-    let sha = null;
-    try {
-      const r = await fetch(url, { headers: { 'Authorization': 'token ' + githubConfig.token } });
-      if (r.ok) { const d = await r.json(); sha = d.sha; }
-    } catch(e) {}
-    
-    const body = { message: 'Actualización A220 - ' + new Date().toLocaleString(), content: content, branch: 'main' };
-    if (sha) body.sha = sha;
-    
-    const res = await fetch(url, {
-      method: 'PUT',
-      headers: { 'Authorization': 'token ' + githubConfig.token, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-    
-    if (res.ok) { showToast('✅ Datos subidos a GitHub', 'success'); playBeep(); }
-    else { showToast('❌ Error al subir', 'error'); }
-  } catch(e) { showToast('❌ Error: ' + e.message, 'error'); }
-}
+            document.getElementById('pName').value = '';
+            document.getElementById('pCat').value = '';
+            document.getElementById('pPrice').value = '';
+            document.getElementById('pStock').value = '';
+            document.getElementById('pMinStock').value = '3';
+            document.getElementById('pBarcode').value = '';
+            document.getElementById('pImage').value = '';
 
-async function syncFromGitHub() {
-  if (!githubConfig.user || !githubConfig.repo || !githubConfig.token) {
-    showToast('⚠️ Configurá GitHub primero', 'error');
-    return;
-  }
-  
-  const url = 'https://api.github.com/repos/' + githubConfig.user + '/' + githubConfig.repo + '/contents/a220_data.json';
-  
-  try {
-    showToast('📥 Descargando desde GitHub...', 'info');
-    const res = await fetch(url, { headers: { 'Authorization': 'token ' + githubConfig.token } });
-    
-    if (res.ok) {
-      const file = await res.json();
-      const content = decodeURIComponent(escape(atob(file.content)));
-      const downloaded = JSON.parse(content);
-      if (downloaded.products) {
-        data = downloaded;
-        save();
-        showToast('✅ Datos descargados', 'success');
-        playBeep();
-      }
-    } else if (res.status === 404) {
-      showToast('⚠️ No hay datos en GitHub. Subí primero.', 'error');
-    } else {
-      showToast('❌ Error al descargar', 'error');
-    }
-  } catch(e) { showToast('❌ Error: ' + e.message, 'error'); }
-}
+            save();
+            showToast('✅ Producto agregado', 'success');
+            playBeep();
+        }
 
-// ============================================
-// RELOJ
-// ============================================
-setInterval(() => {
-  const clock = document.getElementById('clock');
-  if (clock) clock.textContent = dateTimeStr();
-}, 1000);
+        function editProduct(id) {
+            const p = data.products.find(x => x.id === id);
+            if (!p) return;
+            const name = prompt('Nombre:', p.name);
+            if (name === null) return;
+            const cat = prompt('Categoría:', p.cat) || 'General';
+            const price = Number(prompt('Precio:', p.price));
+            const stock = Number(prompt('Stock:', p.stock));
+            const minStock = Number(prompt('Stock mínimo:', p.minStock));
+            const barcode = prompt('Código de barras:', p.barcode || '');
+            const image = prompt('URL de imagen:', p.image || '');
 
-// ============================================
-// RENDER TODO
-// ============================================
-function renderAll() {
-  if (!isLoggedIn) return;
-  renderDashboard();
-  renderProducts();
-  renderCart();
-  renderMoves();
-}
+            if (isNaN(price) || isNaN(stock) || isNaN(minStock)) {
+                showToast('Valores inválidos', 'error');
+                return;
+            }
 
-// ============================================
-// INICIO
-// ============================================
-const clock = document.getElementById('clock');
-if (clock) clock.textContent = dateTimeStr();
-loadGitHubConfig();
+            p.name = name.trim();
+            p.cat = cat.trim();
+            p.price = price;
+            p.stock = stock;
+            p.minStock = minStock;
+            p.barcode = barcode || p.barcode;
+            p.image = image || p.image;
+            save();
+            showToast('✅ Producto actualizado', 'success');
+        }
 
-console.log('🚀 A220 - Sistema de Gestión');
-console.log('🔑 Contraseña: Lujoci10$$$');
-console.log('📱 URL:', window.location.href);
-</script>
+        function deleteProduct(id) {
+            if (!confirm('¿Eliminar este producto?')) return;
+            data.products = data.products.filter(p => p.id !== id);
+            save();
+            showToast('Producto eliminado', 'success');
+        }
+
+        // ============================================
+        // CARRITO
+        // ============================================
+        function addToCart() {
+            const id = parseInt(document.getElementById('saleProduct').value);
+            const qty = parseInt(document.getElementById('saleQty').value) || 1;
+            const price = Number(document.getElementById('salePrice').value);
+            const p = data.products.find(x => x.id === id);
+
+            if (!p || qty < 1 || qty > p.stock) {
+                showToast('Cantidad inválida o stock insuficiente', 'error');
+                return;
+            }
+
+            const existing = cart.find(item => item.id === p.id);
+            if (existing) {
+                existing.qty += qty;
+                existing.total = existing.qty * existing.price;
+            } else {
+                cart.push({ id: p.id, name: p.name, qty, price, total: qty * price });
+            }
+
+            renderCart();
+            showToast(qty + 'x ' + p.name + ' agregado', 'success');
+            playBeep();
+            currentQty = 1;
+            const display = document.getElementById('qtyDisplay');
+            const input = document.getElementById('saleQty');
+            if (display) display.textContent = '1';
+            if (input) input.value = '1';
+        }
+
+        function renderCart() {
+            const cartEl = document.getElementById('cart');
+            if (!cartEl) return;
+            cartEl.innerHTML = cart.map((i, n) =>
+                '<tr><td>' + i.name + '</td><td>' + i.qty + '</td><td>' + money(i.price) + '</td><td>' + money(i
+                    .total) +
+                '</td><td><button class="btn btn-d btn-xs" onclick="removeFromCart(' + n +
+                ')"><i class="fas fa-times"></i></button></td></tr>'
+            ).join('') || '<tr><td colspan="5" style="text-align:center;color:var(--l);">Carrito vacío</td></tr>';
+
+            const totalEl = document.getElementById('cartTotal');
+            if (totalEl) totalEl.textContent = money(cart.reduce((a, i) => a + i.total, 0));
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            renderCart();
+        }
+
+        function finishSale() {
+            if (!cart.length) {
+                showToast('No hay productos', 'error');
+                return;
+            }
+
+            const now = dateTimeStr();
+            const total = cart.reduce((a, i) => a + i.total, 0);
+
+            cart.forEach(i => {
+                const p = data.products.find(x => x.id === i.id);
+                if (p) p.stock -= i.qty;
+                data.moves.unshift({ date: now, product: i.name, qty: i.qty, total: i.total });
+            });
+
+            data.sales.unshift({ date: now, total, items: [...cart] });
+            cart = [];
+            save();
+            showToast('💰 Venta registrada: ' + money(total), 'success');
+            playBeep();
+        }
+
+        function quickSell(id) {
+            const p = data.products.find(x => x.id === id);
+            if (!p) return;
+            const qty = Number(prompt('Cantidad de "' + p.name + '" (stock: ' + p.stock + '):', 1));
+            if (!qty || qty < 1 || qty > p.stock) {
+                showToast('Cantidad inválida', 'error');
+                return;
+            }
+
+            const total = qty * p.price;
+            const now = dateTimeStr();
+            p.stock -= qty;
+            data.moves.unshift({ date: now, product: p.name, qty, total });
+            data.sales.unshift({ date: now, total, items: [{ id: p.id, name: p.name, qty, price: p.price, total }] });
+            save();
+            showToast('Venta rápida: ' + qty + 'x ' + p.name + ' = ' + money(total), 'success');
+            playBeep();
+        }
+
+        // ============================================
+        // MOVIMIENTOS
+        // ============================================
+        function renderMoves() {
+            const movesEl = document.getElementById('moves');
+            if (!movesEl) return;
+            movesEl.innerHTML = data.moves.map(m =>
+                '<tr><td>' + m.date + '</td><td>' + m.product + '</td><td>' + m.qty + '</td><td>' + money(m.total) +
+                '</td></tr>'
+            ).join('') || '<tr><td colspan="4" style="text-align:center;color:var(--l);">No hay movimientos</td></tr>';
+        }
+
+        // ============================================
+        // SCANNER
+        // ============================================
+        let scannerRunning = false;
+        let scanDebounce = false;
+        let currentFacing = 'environment';
+
+        function startScanner() {
+            const c = document.getElementById('S');
+            if (c) c.classList.add('active');
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                const status = document.getElementById('scannerStatus');
+                if (status) status.innerHTML = '❌ No se puede acceder a la cámara';
+                return;
+            }
+
+            const status = document.getElementById('scannerStatus');
+            if (status) status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando...';
+            const view = document.querySelector('#SV');
+            if (view) view.innerHTML = '<div class="so"></div>';
+
+            Quagga.init({
+                inputStream: {
+                    name: "Live",
+                    type: "LiveStream",
+                    target: document.querySelector('#SV'),
+                    constraints: { facingMode: currentFacing, width: { ideal: 640 }, height: { ideal: 480 } }
+                },
+                decoder: { readers: ["ean_reader", "ean_8_reader", "code_128_reader", "code_39_reader",
+                        "upc_reader"
+                    ] }
+            }, function(err) {
+                if (err) {
+                    if (status) status.innerHTML = '❌ Error';
+                    return;
+                }
+                Quagga.start();
+                scannerRunning = true;
+                if (status) status.innerHTML = '<i class="fas fa-camera"></i> Apuntá al código';
+            });
+
+            Quagga.onDetected(function(result) {
+                if (scanDebounce) return;
+                scanDebounce = true;
+
+                const code = result.codeResult.code;
+                if (status) status.innerHTML = '✅ Código: ' + code;
+                playBeep();
+
+                const product = data.products.find(p => p.barcode === code);
+                if (product) {
+                    const sel = document.getElementById('saleProduct');
+                    if (sel) sel.value = product.id;
+                    updatePreview();
+                    setPrice();
+                    currentQty = 1;
+                    const display = document.getElementById('qtyDisplay');
+                    const input = document.getElementById('saleQty');
+                    if (display) display.textContent = '1';
+                    if (input) input.value = '1';
+
+                    const qty = 1;
+                    if (product.stock >= qty) {
+                        const existing = cart.find(item => item.id === product.id);
+                        if (existing) { existing.qty += qty;
+                            existing.total = existing.qty * existing.price; } else { cart.push({ id: product.id,
+                                name: product.name, qty, price: product.price, total: product.price }); }
+                        renderCart();
+                        showToast('📷 ' + product.name + ' agregado', 'success');
+                    } else {
+                        showToast('⚠️ Stock insuficiente', 'error');
+                    }
+
+                    data.scans.unshift({ date: dateTimeStr(), barcode: code, product: product.name });
+                    save();
+
+                    const log = document.getElementById('scanLog');
+                    if (log) {
+                        const div = document.createElement('div');
+                        div.innerHTML = '<span>✅ ' + product.name + '</span><span class="tm">' + dateTimeStr() +
+                            '</span>';
+                        log.prepend(div);
+                        if (log.children.length > 20) log.removeChild(log.lastChild);
+                    }
+
+                    setTimeout(stopScanner, 1500);
+                } else {
+                    showToast('⚠️ Producto no encontrado', 'error');
+                }
+
+                setTimeout(() => { scanDebounce = false; }, 1500);
+            });
+        }
+
+        function stopScanner() {
+            if (scannerRunning) { try { Quagga.stop(); } catch (e) {} scannerRunning = false; }
+            const c = document.getElementById('S');
+            if (c) c.classList.remove('active');
+            const view = document.querySelector('#SV');
+            if (view) view.innerHTML = '';
+            const status = document.getElementById('scannerStatus');
+            if (status) status.innerHTML = '<i class="fas fa-camera"></i> Apuntá al código';
+        }
+
+        function toggleTorch() {
+            showToast('🔦 Linterna', 'info');
+            try {
+                const track = Quagga.CameraAccess.getActiveStream().getVideoTracks()[0];
+                if (track && track.getCapabilities && track.getCapabilities().torch) {
+                    const t = !track.getSettings().torch;
+                    track.applyConstraints({ advanced: [{ torch: t }] });
+                }
+            } catch (e) {}
+        }
+
+        // ============================================
+        // GITHUB SYNC
+        // ============================================
+        let githubConfig = { user: '', repo: '', token: '' };
+
+        function loadGitHubConfig() {
+            const saved = localStorage.getItem('a220_github_config');
+            if (saved) {
+                try {
+                    githubConfig = JSON.parse(saved);
+                    const gu = document.getElementById('githubUser');
+                    const gr = document.getElementById('githubRepo');
+                    const gt = document.getElementById('githubToken');
+                    if (gu) gu.value = githubConfig.user || '';
+                    if (gr) gr.value = githubConfig.repo || '';
+                    if (gt) gt.value = githubConfig.token || '';
+                } catch (e) {}
+            }
+        }
+
+        function saveGitHubConfig() {
+            const gu = document.getElementById('githubUser');
+            const gr = document.getElementById('githubRepo');
+            const gt = document.getElementById('githubToken');
+            githubConfig.user = gu ? gu.value.trim() : '';
+            githubConfig.repo = gr ? gr.value.trim() : '';
+            githubConfig.token = gt ? gt.value.trim() : '';
+            if (!githubConfig.user || !githubConfig.repo || !githubConfig.token) {
+                showToast('⚠️ Completá todos los campos', 'error');
+                return;
+            }
+            localStorage.setItem('a220_github_config', JSON.stringify(githubConfig));
+            showToast('✅ Configuración guardada', 'success');
+        }
+
+        async function syncToGitHub() {
+            if (!githubConfig.user || !githubConfig.repo || !githubConfig.token) {
+                showToast('⚠️ Configurá GitHub primero', 'error');
+                return;
+            }
+
+            const url = 'https://api.github.com/repos/' + githubConfig.user + '/' + githubConfig.repo +
+                '/contents/a220_data.json';
+            const content = btoa(unescape(encodeURIComponent(JSON.stringify(data, null, 2))));
+
+            try {
+                showToast('📤 Subiendo a GitHub...', 'info');
+                let sha = null;
+                try {
+                    const r = await fetch(url, { headers: { 'Authorization': 'token ' + githubConfig.token } });
+                    if (r.ok) { const d = await r.json();
+                        sha = d.sha; }
+                } catch (e) {}
+
+                const body = { message: 'Actualización A220 - ' + new Date().toLocaleString(), content: content,
+                    branch: 'main' };
+                if (sha) body.sha = sha;
+
+                const res = await fetch(url, {
+                    method: 'PUT',
+                    headers: { 'Authorization': 'token ' + githubConfig.token,
+                        'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                if (res.ok) { showToast('✅ Datos subidos a GitHub', 'success');
+                    playBeep(); } else { showToast('❌ Error al subir', 'error'); }
+            } catch (e) { showToast('❌ Error: ' + e.message, 'error'); }
+        }
+
+        async function syncFromGitHub() {
+            if (!githubConfig.user || !githubConfig.repo || !githubConfig.token) {
+                showToast('⚠️ Configurá GitHub primero', 'error');
+                return;
+            }
+
+            const url = 'https://api.github.com/repos/' + githubConfig.user + '/' + githubConfig.repo +
+                '/contents/a220_data.json';
+
+            try {
+                showToast('📥 Descargando desde GitHub...', 'info');
+                const res = await fetch(url, { headers: { 'Authorization': 'token ' + githubConfig.token } });
+
+                if (res.ok) {
+                    const file = await res.json();
+                    const content = decodeURIComponent(escape(atob(file.content)));
+                    const downloaded = JSON.parse(content);
+                    if (downloaded.products) {
+                        data = downloaded;
+                        save();
+                        showToast('✅ Datos descargados', 'success');
+                        playBeep();
+                    }
+                } else if (res.status === 404) {
+                    showToast('⚠️ No hay datos en GitHub. Subí primero.', 'error');
+                } else {
+                    showToast('❌ Error al descargar', 'error');
+                }
+            } catch (e) { showToast('❌ Error: ' + e.message, 'error'); }
+        }
+
+        // ============================================
+        // RELOJ
+        // ============================================
+        setInterval(() => {
+            const clock = document.getElementById('clock');
+            if (clock) clock.textContent = dateTimeStr();
+        }, 1000);
+
+        // ============================================
+        // RENDER TODO
+        // ============================================
+        function renderAll() {
+            if (!isLoggedIn) return;
+            renderDashboard();
+            renderProducts();
+            renderCart();
+            renderMoves();
+        }
+
+        // ============================================
+        // INICIO
+        // ============================================
+        const clock = document.getElementById('clock');
+        if (clock) clock.textContent = dateTimeStr();
+        loadGitHubConfig();
+
+        console.log('🚀 A220 - Sistema de Gestión');
+        console.log('🔑 Contraseña: Lujoci10$$$');
+        console.log('📱 URL:', window.location.href);
+    </script>
+
 </body>
 </html>
