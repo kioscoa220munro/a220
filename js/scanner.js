@@ -1,5 +1,5 @@
 // ============================================
-// SCANNER CON BARCODEDETECTOR (MÁS RÁPIDO)
+// SCANNER HÍBRIDO (PC + CELULAR)
 // ============================================
 
 let scannerRunning = false;
@@ -12,19 +12,27 @@ function startScanner() {
     const status = document.getElementById('scannerStatus');
     const view = document.querySelector('#scannerView');
 
-    // Verificar soporte
-    if (!('BarcodeDetector' in window)) {
-        status.innerHTML = '❌ Tu navegador no soporta escaneo nativo. Usá Chrome o Edge.';
-        return;
-    }
+    // Detectar si es móvil
+    const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent);
 
     container.classList.add('active');
     status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando cámara...';
+    view.innerHTML = '<div class="scanner-overlay"><div class="scanner-line"></div></div>';
 
-    // Limpiar vista previa
-    view.innerHTML = '';
+    // === MÓVIL: usar BarcodeDetector (rápido) ===
+    if (isMobile && 'BarcodeDetector' in window) {
+        iniciarConBarcode(status, view);
+        return;
+    }
 
-    // Acceder a la cámara
+    // === PC o navegador sin BarcodeDetector: usar Quagga ===
+    iniciarConQuagga(status, view);
+}
+
+// ============================================
+// MÓVIL: BarcodeDetector
+// ============================================
+function iniciarConBarcode(status, view) {
     navigator.mediaDevices.getUserMedia({
         video: {
             facingMode: 'environment',
@@ -40,12 +48,12 @@ function startScanner() {
         video.style.width = '100%';
         video.style.height = '100%';
         video.style.objectFit = 'cover';
+        view.innerHTML = '';
         view.appendChild(video);
         video.play();
 
-        status.innerHTML = '<i class="fas fa-camera"></i> Apuntá al código de barras';
+        status.innerHTML = '<i class="fas fa-camera"></i> Apuntá al código';
 
-        // Crear detector
         const detector = new BarcodeDetector({
             formats: ['ean_13', 'ean_8', 'code_128', 'upc_a', 'qr_code']
         });
@@ -53,7 +61,6 @@ function startScanner() {
         scannerRunning = true;
         scanDebounce = false;
 
-        // Escanear cada 300ms
         scannerInterval = setInterval(function() {
             if (!scannerRunning || scanDebounce) return;
 
@@ -63,77 +70,130 @@ function startScanner() {
                         scanDebounce = true;
                         const code = barcodes[0].rawValue;
                         status.innerHTML = '✅ Código: ' + code;
-                        playBeep();
-
-                        // Buscar producto
-                        const product = data.products.find(p => p.barcode === code);
-                        if (product) {
-                            document.getElementById('saleProduct').value = product.id;
-                            updatePreview();
-                            setPrice();
-                            currentQty = 1;
-                            document.getElementById('qtyDisplay').textContent = '1';
-                            document.getElementById('saleQty').value = '1';
-
-                            const qty = 1;
-                            if (product.stock >= qty) {
-                                const existing = cart.find(item => item.id === product.id);
-                                if (existing) {
-                                    existing.qty += qty;
-                                    existing.total = existing.qty * existing.price;
-                                } else {
-                                    cart.push({
-                                        id: product.id,
-                                        name: product.name,
-                                        qty: qty,
-                                        price: product.price,
-                                        total: product.price
-                                    });
-                                }
-                                renderCart();
-                                showToast('📷 ' + product.name + ' agregado', 'success');
-                            } else {
-                                showToast('⚠️ Stock insuficiente', 'error');
-                            }
-
-                            data.scans.unshift({
-                                date: dateTimeStr(),
-                                barcode: code,
-                                product: product.name
-                            });
-                            save();
-
-                            const log = document.getElementById('scanLog');
-                            if (log) {
-                                const div = document.createElement('div');
-                                div.innerHTML = '<span>✅ ' + product.name + '</span><span class="time">' + dateTimeStr() + '</span>';
-                                log.prepend(div);
-                                if (log.children.length > 20) log.removeChild(log.lastChild);
-                            }
-
-                            setTimeout(stopScanner, 1500);
-                        } else {
-                            showToast('⚠️ Producto no encontrado: ' + code, 'error');
-                            playErrorBeep();
-                            setTimeout(function() {
-                                scanDebounce = false;
-                            }, 1000);
-                        }
+                        procesarCodigo(code);
+                        setTimeout(stopScanner, 1500);
                     }
                 })
                 .catch(function(err) {
                     // Error de detección, se ignora
                 });
         }, 300);
-
     })
     .catch(function(err) {
         status.innerHTML = '❌ Error al acceder a la cámara';
-        console.error('Error:', err);
         showToast('❌ No se puede acceder a la cámara', 'error');
+        console.error('Error:', err);
+        // Si falla BarcodeDetector, intentar con Quagga
+        status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Intentando con método alternativo...';
+        setTimeout(() => iniciarConQuagga(status, view), 1000);
     });
 }
 
+// ============================================
+// PC: Quagga (compatible con todos)
+// ============================================
+function iniciarConQuagga(status, view) {
+    view.innerHTML = '<div class="scanner-overlay"><div class="scanner-line"></div></div>';
+
+    Quagga.init({
+        inputStream: {
+            name: "Live",
+            type: "LiveStream",
+            target: document.querySelector('#scannerView'),
+            constraints: {
+                facingMode: "environment",
+                width: { ideal: 640 },
+                height: { ideal: 480 }
+            }
+        },
+        decoder: {
+            readers: ["ean_reader", "ean_8_reader", "code_128_reader"],
+            multiple: false
+        },
+        locate: false
+    }, function(err) {
+        if (err) {
+            status.innerHTML = '❌ Error: ' + err.message;
+            showToast('❌ Error al iniciar escáner', 'error');
+            return;
+        }
+        Quagga.start();
+        scannerRunning = true;
+        status.innerHTML = '<i class="fas fa-camera"></i> Apuntá al código';
+    });
+
+    Quagga.onDetected(function(result) {
+        if (scanDebounce) return;
+        scanDebounce = true;
+        const code = result.codeResult.code;
+        status.innerHTML = '✅ Código: ' + code;
+        procesarCodigo(code);
+        setTimeout(stopScanner, 1500);
+    });
+}
+
+// ============================================
+// PROCESAR CÓDIGO (común para ambos)
+// ============================================
+function procesarCodigo(code) {
+    playBeep();
+
+    const product = data.products.find(p => p.barcode === code);
+    if (product) {
+        document.getElementById('saleProduct').value = product.id;
+        updatePreview();
+        setPrice();
+        currentQty = 1;
+        document.getElementById('qtyDisplay').textContent = '1';
+        document.getElementById('saleQty').value = '1';
+
+        if (product.stock >= 1) {
+            const existing = cart.find(item => item.id === product.id);
+            if (existing) {
+                existing.qty += 1;
+                existing.total = existing.qty * existing.price;
+            } else {
+                cart.push({
+                    id: product.id,
+                    name: product.name,
+                    qty: 1,
+                    price: product.price,
+                    total: product.price
+                });
+            }
+            renderCart();
+            showToast('📷 ' + product.name + ' agregado', 'success');
+        } else {
+            showToast('⚠️ Stock insuficiente', 'error');
+            playErrorBeep();
+            scanDebounce = false;
+            return;
+        }
+
+        data.scans.unshift({
+            date: dateTimeStr(),
+            barcode: code,
+            product: product.name
+        });
+        save();
+
+        const log = document.getElementById('scanLog');
+        if (log) {
+            const div = document.createElement('div');
+            div.innerHTML = '<span>✅ ' + product.name + '</span><span class="time">' + dateTimeStr() + '</span>';
+            log.prepend(div);
+            if (log.children.length > 20) log.removeChild(log.lastChild);
+        }
+    } else {
+        showToast('⚠️ Producto no encontrado: ' + code, 'error');
+        playErrorBeep();
+        setTimeout(() => { scanDebounce = false; }, 1000);
+    }
+}
+
+// ============================================
+// DETENER ESCÁNER
+// ============================================
 function stopScanner() {
     scannerRunning = false;
     if (scannerInterval) {
@@ -146,19 +206,44 @@ function stopScanner() {
         });
         scannerStream = null;
     }
+    if (typeof Quagga !== 'undefined' && Quagga.stop) {
+        try { Quagga.stop(); } catch(e) {}
+    }
     document.getElementById('scannerContainer').classList.remove('active');
     const view = document.querySelector('#scannerView');
     if (view) view.innerHTML = '';
     const status = document.getElementById('scannerStatus');
-    if (status) status.innerHTML = '<i class="fas fa-camera"></i> Apuntá al código de barras';
+    if (status) status.innerHTML = '<i class="fas fa-camera"></i> Apuntá al código';
 }
 
+// ============================================
+// LINTERNA
+// ============================================
 function toggleTorch() {
     showToast('🔦 Linterna', 'info');
-    // La linterna no es soportada por BarcodeDetector nativamente
-    // Se puede implementar con track.applyConstraints pero es complejo
+    try {
+        const track = Quagga.CameraAccess?.getActiveStream()?.getVideoTracks()[0];
+        if (track && track.getCapabilities && track.getCapabilities().torch) {
+            const t = !track.getSettings().torch;
+            track.applyConstraints({ advanced: [{ torch: t }] });
+        }
+    } catch(e) {
+        // Si Quagga no está, intentar con stream de BarcodeDetector
+        try {
+            if (scannerStream) {
+                const track = scannerStream.getVideoTracks()[0];
+                if (track && track.getCapabilities && track.getCapabilities().torch) {
+                    const t = !track.getSettings().torch;
+                    track.applyConstraints({ advanced: [{ torch: t }] });
+                }
+            }
+        } catch(e2) {}
+    }
 }
 
+// ============================================
+// SONIDOS
+// ============================================
 function playBeep() {
     try {
         const ctx = new(window.AudioContext || window.webkitAudioContext)();
@@ -171,7 +256,7 @@ function playBeep() {
         gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
         osc.start();
         osc.stop(ctx.currentTime + 0.15);
-    } catch (e) {}
+    } catch(e) {}
 }
 
 function playErrorBeep() {
@@ -187,5 +272,5 @@ function playErrorBeep() {
         gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
         osc.start();
         osc.stop(ctx.currentTime + 0.3);
-    } catch (e) {}
+    } catch(e) {}
 }
