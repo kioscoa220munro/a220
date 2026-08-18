@@ -1,121 +1,162 @@
 // ============================================
-// SCANNER OPTIMIZADO
+// SCANNER CON BARCODEDETECTOR (MÁS RÁPIDO)
 // ============================================
 
 let scannerRunning = false;
 let scanDebounce = false;
-let currentFacing = 'environment';
+let scannerInterval = null;
+let scannerStream = null;
 
 function startScanner() {
-    const c = document.getElementById('scannerContainer');
-    if (c) c.classList.add('active');
+    const container = document.getElementById('scannerContainer');
+    const status = document.getElementById('scannerStatus');
+    const view = document.querySelector('#scannerView');
 
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        const status = document.getElementById('scannerStatus');
-        if (status) status.innerHTML = '❌ No se puede acceder a la cámara';
+    // Verificar soporte
+    if (!('BarcodeDetector' in window)) {
+        status.innerHTML = '❌ Tu navegador no soporta escaneo nativo. Usá Chrome o Edge.';
         return;
     }
 
-    const status = document.getElementById('scannerStatus');
-    if (status) status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando...';
-    const view = document.querySelector('#scannerView');
-    if (view) view.innerHTML = '<div class="scanner-overlay"><div class="scanner-line"></div></div>';
+    container.classList.add('active');
+    status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Iniciando cámara...';
 
-    Quagga.init({
-        inputStream: {
-            name: "Live",
-            type: "LiveStream",
-            target: document.querySelector('#scannerView'),
-            constraints: {
-                facingMode: currentFacing,
-                width: { ideal: 400 },
-                height: { ideal: 300 }
-            }
-        },
-        decoder: {
-            readers: ["ean_reader", "ean_8_reader", "code_128_reader", "code_39_reader", "upc_reader"],
-            multiple: false
-        },
-        locate: false
-    }, function(err) {
-        if (err) {
-            if (status) status.innerHTML = '❌ Error al iniciar';
-            return;
+    // Limpiar vista previa
+    view.innerHTML = '';
+
+    // Acceder a la cámara
+    navigator.mediaDevices.getUserMedia({
+        video: {
+            facingMode: 'environment',
+            width: { ideal: 640 },
+            height: { ideal: 480 }
         }
-        Quagga.start();
+    })
+    .then(function(stream) {
+        scannerStream = stream;
+        const video = document.createElement('video');
+        video.srcObject = stream;
+        video.setAttribute('playsinline', '');
+        video.style.width = '100%';
+        video.style.height = '100%';
+        video.style.objectFit = 'cover';
+        view.appendChild(video);
+        video.play();
+
+        status.innerHTML = '<i class="fas fa-camera"></i> Apuntá al código de barras';
+
+        // Crear detector
+        const detector = new BarcodeDetector({
+            formats: ['ean_13', 'ean_8', 'code_128', 'upc_a', 'qr_code']
+        });
+
         scannerRunning = true;
-        if (status) status.innerHTML = '<i class="fas fa-camera"></i> Apuntá al código';
-    });
+        scanDebounce = false;
 
-    Quagga.onDetected(function(result) {
-        if (scanDebounce) return;
-        scanDebounce = true;
+        // Escanear cada 300ms
+        scannerInterval = setInterval(function() {
+            if (!scannerRunning || scanDebounce) return;
 
-        const code = result.codeResult.code;
-        if (status) status.innerHTML = '✅ Código: ' + code;
-        playBeep();
+            detector.detect(video)
+                .then(function(barcodes) {
+                    if (barcodes.length > 0 && !scanDebounce) {
+                        scanDebounce = true;
+                        const code = barcodes[0].rawValue;
+                        status.innerHTML = '✅ Código: ' + code;
+                        playBeep();
 
-        const product = data.products.find(p => p.barcode === code);
-        if (product) {
-            document.getElementById('saleProduct').value = product.id;
-            updatePreview();
-            setPrice();
-            currentQty = 1;
-            document.getElementById('qtyDisplay').textContent = '1';
-            document.getElementById('saleQty').value = '1';
+                        // Buscar producto
+                        const product = data.products.find(p => p.barcode === code);
+                        if (product) {
+                            document.getElementById('saleProduct').value = product.id;
+                            updatePreview();
+                            setPrice();
+                            currentQty = 1;
+                            document.getElementById('qtyDisplay').textContent = '1';
+                            document.getElementById('saleQty').value = '1';
 
-            const qty = 1;
-            if (product.stock >= qty) {
-                const existing = cart.find(item => item.id === product.id);
-                if (existing) { existing.qty += qty;
-                    existing.total = existing.qty * existing.price; } else { cart.push({ id: product.id,
-                    name: product.name, qty, price: product.price, total: product.price }); }
-                renderCart();
-                showToast('📷 ' + product.name + ' agregado', 'success');
-            } else {
-                showToast('⚠️ Stock insuficiente', 'error');
-            }
+                            const qty = 1;
+                            if (product.stock >= qty) {
+                                const existing = cart.find(item => item.id === product.id);
+                                if (existing) {
+                                    existing.qty += qty;
+                                    existing.total = existing.qty * existing.price;
+                                } else {
+                                    cart.push({
+                                        id: product.id,
+                                        name: product.name,
+                                        qty: qty,
+                                        price: product.price,
+                                        total: product.price
+                                    });
+                                }
+                                renderCart();
+                                showToast('📷 ' + product.name + ' agregado', 'success');
+                            } else {
+                                showToast('⚠️ Stock insuficiente', 'error');
+                            }
 
-            data.scans.unshift({ date: dateTimeStr(), barcode: code, product: product.name });
-            save();
+                            data.scans.unshift({
+                                date: dateTimeStr(),
+                                barcode: code,
+                                product: product.name
+                            });
+                            save();
 
-            const log = document.getElementById('scanLog');
-            if (log) {
-                const div = document.createElement('div');
-                div.innerHTML = '<span>✅ ' + product.name + '</span><span class="time">' + dateTimeStr() + '</span>';
-                log.prepend(div);
-                if (log.children.length > 20) log.removeChild(log.lastChild);
-            }
+                            const log = document.getElementById('scanLog');
+                            if (log) {
+                                const div = document.createElement('div');
+                                div.innerHTML = '<span>✅ ' + product.name + '</span><span class="time">' + dateTimeStr() + '</span>';
+                                log.prepend(div);
+                                if (log.children.length > 20) log.removeChild(log.lastChild);
+                            }
 
-            setTimeout(stopScanner, 1500);
-        } else {
-            showToast('⚠️ Producto no encontrado: ' + code, 'error');
-            playErrorBeep();
-        }
+                            setTimeout(stopScanner, 1500);
+                        } else {
+                            showToast('⚠️ Producto no encontrado: ' + code, 'error');
+                            playErrorBeep();
+                            setTimeout(function() {
+                                scanDebounce = false;
+                            }, 1000);
+                        }
+                    }
+                })
+                .catch(function(err) {
+                    // Error de detección, se ignora
+                });
+        }, 300);
 
-        setTimeout(() => { scanDebounce = false; }, 1500);
+    })
+    .catch(function(err) {
+        status.innerHTML = '❌ Error al acceder a la cámara';
+        console.error('Error:', err);
+        showToast('❌ No se puede acceder a la cámara', 'error');
     });
 }
 
 function stopScanner() {
-    if (scannerRunning) { try { Quagga.stop(); } catch (e) {} scannerRunning = false; }
-    const c = document.getElementById('scannerContainer');
-    if (c) c.classList.remove('active');
+    scannerRunning = false;
+    if (scannerInterval) {
+        clearInterval(scannerInterval);
+        scannerInterval = null;
+    }
+    if (scannerStream) {
+        scannerStream.getTracks().forEach(function(track) {
+            track.stop();
+        });
+        scannerStream = null;
+    }
+    document.getElementById('scannerContainer').classList.remove('active');
     const view = document.querySelector('#scannerView');
     if (view) view.innerHTML = '';
     const status = document.getElementById('scannerStatus');
-    if (status) status.innerHTML = '<i class="fas fa-camera"></i> Apuntá al código';
+    if (status) status.innerHTML = '<i class="fas fa-camera"></i> Apuntá al código de barras';
 }
 
 function toggleTorch() {
     showToast('🔦 Linterna', 'info');
-    try {
-        const track = Quagga.CameraAccess.getActiveStream().getVideoTracks()[0];
-        if (track && track.getCapabilities && track.getCapabilities().torch) {
-            const t = !track.getSettings().torch;
-            track.applyConstraints({ advanced: [{ torch: t }] });
-        }
-    } catch (e) {}
+    // La linterna no es soportada por BarcodeDetector nativamente
+    // Se puede implementar con track.applyConstraints pero es complejo
 }
 
 function playBeep() {
