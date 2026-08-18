@@ -90,46 +90,40 @@ function iniciarConBarcode(status, view) {
 }
 
 // ============================================
-// PC: Quagga (compatible con todos)
+// PC: Quagga (compatible con todos) CON RETRASO
 // ============================================
 function iniciarConQuagga(status, view) {
     view.innerHTML = '<div class="scanner-overlay"><div class="scanner-line"></div></div>';
 
-    Quagga.init({
-        inputStream: {
-            name: "Live",
-            type: "LiveStream",
-            target: document.querySelector('#scannerView'),
-            constraints: {
-                facingMode: "environment",
-                width: { ideal: 640 },
-                height: { ideal: 480 }
+    // RETRASO DE 500ms PARA ASEGURAR QUE EL DOM ESTÉ LISTO
+    setTimeout(function() {
+        Quagga.init({
+            inputStream: {
+                name: "Live",
+                type: "LiveStream",
+                target: document.querySelector('#scannerView'),
+                constraints: {
+                    facingMode: "environment",
+                    width: { ideal: 640 },
+                    height: { ideal: 480 }
+                }
+            },
+            decoder: {
+                readers: ["ean_reader", "ean_8_reader", "code_128_reader"],
+                multiple: false
+            },
+            locate: false
+        }, function(err) {
+            if (err) {
+                status.innerHTML = '❌ Error: ' + err.message;
+                showToast('❌ Error al iniciar escáner', 'error');
+                return;
             }
-        },
-        decoder: {
-            readers: ["ean_reader", "ean_8_reader", "code_128_reader"],
-            multiple: false
-        },
-        locate: false
-    }, function(err) {
-        if (err) {
-            status.innerHTML = '❌ Error: ' + err.message;
-            showToast('❌ Error al iniciar escáner', 'error');
-            return;
-        }
-        Quagga.start();
-        scannerRunning = true;
-        status.innerHTML = '<i class="fas fa-camera"></i> Apuntá al código';
-    });
-
-    Quagga.onDetected(function(result) {
-        if (scanDebounce) return;
-        scanDebounce = true;
-        const code = result.codeResult.code;
-        status.innerHTML = '✅ Código: ' + code;
-        procesarCodigo(code);
-        setTimeout(stopScanner, 1500);
-    });
+            Quagga.start();
+            scannerRunning = true;
+            status.innerHTML = '<i class="fas fa-camera"></i> Apuntá al código';
+        });
+    }, 500);
 }
 
 // ============================================
