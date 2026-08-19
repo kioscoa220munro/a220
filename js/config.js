@@ -1,25 +1,101 @@
 // ============================================
-// CONFIGURACIÓN
+// CONFIGURACIÓN A220 PRO
 // ============================================
 
-// 📧 TU EMAIL AUTORIZADO (SOLO ESTE PUEDE ENTRAR)
-// ⚠️ REEMPLAZÁ ESTE VALOR CON TU EMAIL
-const EMAIL_AUTORIZADO = 'kiosco.a220@gmail.com';
+// 📧 EMAILS AUTORIZADOS POR DEFECTO
+var DEFAULT_AUTHORIZED_EMAILS = [
+    'kiosco.a220@gmail.com',
+    'kioscoa220munro@gmail.com'
+];
 
 // 🔑 CLIENTE ID DE GOOGLE
-// ⚠️ REEMPLAZÁ ESTE VALOR CON EL TUYO
-// Crearlo en: https://console.cloud.google.com/apis/credentials
-const GOOGLE_CLIENT_ID = '939192749315-chhqng50baio8koc839eu1quaatme0jm.apps.googleusercontent.com';
+var GOOGLE_CLIENT_ID = '939192749315-chhqng50baio8koc839eu1quaatme0jm.apps.googleusercontent.com';
 
 // 📦 CLAVE PARA LOCALSTORAGE
-const STORAGE_KEY = 'a220_pro_data';
+var STORAGE_KEY = 'a220_pro_data';
+var AUTH_EMAILS_STORAGE_KEY = 'a220_authorized_emails';
 
 // 👤 DATOS POR DEFECTO DE GITHUB
-const DEFAULT_GITHUB = {
+var DEFAULT_GITHUB = {
     user: 'kioscoa220munro',
-    repo: 'a220-data',
+    repo: 'a220',
     token: ''
 };
+
+// ============================================
+// GESTIÓN DE EMAILS AUTORIZADOS
+// ============================================
+
+function getAuthorizedEmails() {
+    try {
+        const saved = localStorage.getItem(AUTH_EMAILS_STORAGE_KEY);
+        if (saved) {
+            const parsed = JSON.parse(saved);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                return parsed.map(e => String(e).toLowerCase().trim());
+            }
+        }
+    } catch (e) {
+        console.error('Error al leer emails autorizados:', e);
+    }
+    return [...DEFAULT_AUTHORIZED_EMAILS].map(e => e.toLowerCase().trim());
+}
+
+function saveAuthorizedEmails(emails) {
+    if (!Array.isArray(emails)) return false;
+    const cleanList = [...new Set(emails.map(e => String(e).toLowerCase().trim()).filter(e => e.length > 0))];
+    localStorage.setItem(AUTH_EMAILS_STORAGE_KEY, JSON.stringify(cleanList));
+    return true;
+}
+
+function isEmailAuthorized(email) {
+    if (!email) return false;
+    const clean = String(email).toLowerCase().trim();
+    const authorized = getAuthorizedEmails();
+    return authorized.includes(clean);
+}
+
+function addAuthorizedEmail(email) {
+    if (!email) return { success: false, message: 'El email no puede estar vacío' };
+    const clean = String(email).toLowerCase().trim();
+    
+    // Validación básica de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(clean)) {
+        return { success: false, message: 'Formato de email inválido' };
+    }
+
+    const current = getAuthorizedEmails();
+    if (current.includes(clean)) {
+        return { success: false, message: 'El email ya está autorizado' };
+    }
+
+    current.push(clean);
+    saveAuthorizedEmails(current);
+    return { success: true, message: `Email ${clean} autorizado correctamente` };
+}
+
+function removeAuthorizedEmail(email, loggedInUser) {
+    if (!email) return { success: false, message: 'Email inválido' };
+    const clean = String(email).toLowerCase().trim();
+    const current = getAuthorizedEmails();
+
+    if (current.length <= 1) {
+        return { success: false, message: 'No podés eliminar el único email autorizado' };
+    }
+
+    if (loggedInUser && loggedInUser.toLowerCase().trim() === clean) {
+        return { success: false, message: 'No podés eliminar tu propia cuenta mientras estás conectado' };
+    }
+
+    const filtered = current.filter(e => e !== clean);
+    if (filtered.length === current.length) {
+        return { success: false, message: 'El email no se encontró en la lista' };
+    }
+
+    saveAuthorizedEmails(filtered);
+    return { success: true, message: `Email ${clean} eliminado de autorizados` };
+}
 
 // 📦 PRODUCTOS INICIALES
 function getDefaultProducts() {
