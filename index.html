@@ -34,6 +34,35 @@
             object-fit: cover;
             border-radius: 8px;
         }
+        /* Estilo para el buscador de productos */
+        #listaProductos {
+            background: var(--c);
+            border: 2px solid var(--e);
+            border-radius: var(--s);
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 4px;
+            position: absolute;
+            width: 100%;
+            z-index: 10;
+            box-shadow: var(--h);
+        }
+        #listaProductos div {
+            padding: 10px 14px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--e);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: 0.2s;
+        }
+        #listaProductos div:hover {
+            background: rgba(245,158,11,0.1);
+        }
+        .buscador-wrapper {
+            position: relative;
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -41,7 +70,7 @@
     <!-- ===== LOGIN CON GOOGLE ===== -->
     <div id="loginOverlay">
         <div class="login-box">
-            <div class="brand">A <span>220</span></div>
+            <div class="brand"><i class="fas fa-bolt" id="rayo"></i> A <span>220</span></div>
             <div class="sub">Sistema de Gestión</div>
             <div style="margin:20px 0;">
                 <button class="btn-google" onclick="loginConGmail()">
@@ -55,16 +84,8 @@
         </div>
     </div>
 
-    <!-- ===== SCANNER MODAL ===== -->
+    <!-- ===== SCANNER ===== -->
     <div id="scannerContainer">
-        <div class="scanner-top-bar">
-            <span id="scannerEngineBadge" class="badge badge-info">
-                <i class="fas fa-camera"></i> Escáner
-            </span>
-            <button class="btn btn-outline btn-xs" onclick="switchScannerEngine()" style="color:#fff;border-color:rgba(255,255,255,0.3);">
-                <i class="fas fa-exchange-alt"></i> Cambiar motor
-            </button>
-        </div>
         <div id="scannerView">
             <div class="scanner-overlay">
                 <div class="scanner-line"></div>
@@ -89,7 +110,7 @@
     <!-- ===== HEADER ===== -->
     <header>
         <div>
-            <div class="brand">A <span>220</span></div>
+            <div class="brand"><i class="fas fa-bolt" id="rayo"></i> A <span>220</span></div>
             <div class="sub">Gestión · Kiosco</div>
         </div>
         <div class="header-right">
@@ -98,10 +119,10 @@
                 <img id="userAvatar" src="" style="width:24px;height:24px;border-radius:50%;display:none;">
                 <span id="userDisplay" style="font-size:12px;color:#cbd5e1;"></span>
             </span>
-            <button class="btn-icon" onclick="toggleTheme()" title="Cambiar tema">
+            <button class="btn-icon" onclick="toggleTheme()">
                 <i class="fas fa-moon"></i>
             </button>
-            <button class="btn-icon" onclick="doLogout()" title="Cerrar sesión">
+            <button class="btn-icon" onclick="doLogout()">
                 <i class="fas fa-sign-out-alt"></i>
             </button>
         </div>
@@ -126,8 +147,8 @@
             <span>Movimientos</span>
         </button>
         <button onclick="showView('sync',this)">
-            <i class="fas fa-cog"></i>
-            <span>Configuración</span>
+            <i class="fas fa-sync"></i>
+            <span>Sincronizar</span>
         </button>
     </nav>
 
@@ -169,7 +190,7 @@
             </div>
 
             <div class="panel">
-                <h3><i class="fas fa-bell"></i> Alertas de stock</h3>
+                <h3><i class="fas fa-bell"></i> Alertas</h3>
                 <div id="alertas">Sin alertas.</div>
             </div>
 
@@ -191,13 +212,17 @@
             <div class="panel">
                 <div class="scanner-btn-wrapper">
                     <button class="scanner-btn" onclick="startScanner()">
-                        <i class="fas fa-camera"></i> Escanear código de barras
+                        <i class="fas fa-camera"></i> Escanear código
                     </button>
                 </div>
 
+                <!-- ===== BUSCADOR DE PRODUCTOS (NUEVO) ===== -->
                 <div class="form-group">
-                    <label>Producto</label>
-                    <select id="saleProduct" onchange="updatePreview()"></select>
+                    <label>Buscar producto</label>
+                    <div class="buscador-wrapper">
+                        <input type="text" id="buscarProducto" placeholder="Escribí el nombre o código..." oninput="filtrarProductos()" style="width:100%;padding:10px 12px;border:2px solid var(--e);border-radius:var(--s);font-size:14px;background:var(--b);color:var(--t);">
+                        <div id="listaProductos" style="display:none;"></div>
+                    </div>
                 </div>
 
                 <div class="product-preview" id="productPreview">
@@ -222,7 +247,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Precio unitario</label>
+                    <label>Precio</label>
                     <input id="salePrice" type="number" min="0" step="0.01">
                 </div>
 
@@ -232,7 +257,7 @@
             </div>
 
             <div class="panel">
-                <h3><i class="fas fa-shopping-cart"></i> Carrito de compras</h3>
+                <h3><i class="fas fa-shopping-cart"></i> Carrito</h3>
                 <div class="table-wrap">
                     <table>
                         <thead>
@@ -252,38 +277,38 @@
 
             <!-- ===== CLIENTE ===== -->
             <div class="panel">
-                <h3><i class="fas fa-user"></i> Datos del cliente (opcional)</h3>
+                <h3><i class="fas fa-user"></i> Cliente (opcional)</h3>
                 <div class="form-group">
                     <input id="clienteNombre" placeholder="Nombre del cliente">
                 </div>
                 <div class="form-group">
-                    <input id="clienteTelefono" placeholder="Teléfono / WhatsApp">
+                    <input id="clienteTelefono" placeholder="Teléfono">
                 </div>
             </div>
 
             <!-- ===== VUELTO ===== -->
             <div class="panel">
-                <h3><i class="fas fa-cash-register"></i> Pago en efectivo y vuelto</h3>
+                <h3><i class="fas fa-cash-register"></i> Pago en efectivo</h3>
                 <div class="vuelto-wrapper">
-                    <input id="pagoEfectivo" type="number" min="0" step="0.01" placeholder="Paga con...">
+                    <input id="pagoEfectivo" type="number" min="0" step="0.01" placeholder="$0">
                     <button class="btn btn-info" onclick="calcularVuelto()">
-                        <i class="fas fa-calculator"></i> Calcular vuelto
+                        <i class="fas fa-calculator"></i> Calcular
                     </button>
                     <span id="vueltoDisplay">$0</span>
                 </div>
             </div>
 
             <button class="btn btn-success btn-block" onclick="finishSale()">
-                <i class="fas fa-check"></i> Finalizar y cobrar venta
+                <i class="fas fa-check"></i> Cobrar venta
             </button>
 
             <!-- ===== ENVIAR POR EMAIL ===== -->
             <button class="btn btn-info btn-block" onclick="enviarResumenVenta()" style="margin-top:10px;">
-                <i class="fas fa-envelope"></i> Enviar resumen de última venta por email
+                <i class="fas fa-envelope"></i> Enviar resumen por email
             </button>
 
             <div class="panel">
-                <h3><i class="fas fa-qrcode"></i> Historial reciente de escaneos</h3>
+                <h3><i class="fas fa-qrcode"></i> Últimos escaneos</h3>
                 <div class="scan-log" id="scanLog">
                     <div style="color:var(--l);text-align:center;padding:12px;">Sin escaneos</div>
                 </div>
@@ -292,10 +317,10 @@
 
         <!-- ===== PRODUCTOS ===== -->
         <section id="productos" class="view">
-            <h2><i class="fas fa-boxes"></i> Catálogo de Productos</h2>
+            <h2><i class="fas fa-boxes"></i> Productos</h2>
 
             <div class="panel">
-                <h3><i class="fas fa-plus-circle"></i> Agregar o editar producto</h3>
+                <h3><i class="fas fa-plus-circle"></i> Agregar producto</h3>
 
                 <div class="form-group">
                     <label>Nombre</label>
@@ -309,16 +334,16 @@
 
                 <div class="form-group">
                     <label>Precio</label>
-                    <input id="pPrice" type="number" step="0.01" placeholder="0.00">
+                    <input id="pPrice" type="number" step="0.01">
                 </div>
 
                 <div class="form-group">
-                    <label>Stock actual</label>
-                    <input id="pStock" type="number" min="0" placeholder="0">
+                    <label>Stock</label>
+                    <input id="pStock" type="number" min="0">
                 </div>
 
                 <div class="form-group">
-                    <label>Stock mínimo (aviso)</label>
+                    <label>Stock mínimo</label>
                     <input id="pMinStock" type="number" min="0" value="3">
                 </div>
 
@@ -326,8 +351,8 @@
                     <label>Código de barras</label>
                     <div style="display:flex;gap:6px;">
                         <input id="pBarcode" placeholder="Ej. 7791234567890" style="flex:1;">
-                        <button class="btn btn-outline btn-sm" onclick="document.getElementById('pBarcode').value='BAR'+Date.now().toString().slice(-8)" title="Generar código aleatorio">
-                            <i class="fas fa-random"></i> Generar
+                        <button class="btn btn-outline btn-sm" onclick="document.getElementById('pBarcode').value='BAR'+Date.now().toString().slice(-8)">
+                            <i class="fas fa-random"></i>
                         </button>
                     </div>
                 </div>
@@ -351,7 +376,7 @@
             <div class="panel">
                 <div class="search-box">
                     <i class="fas fa-search"></i>
-                    <input id="productSearch" placeholder="Buscar por nombre o código de barras..." oninput="renderProducts()">
+                    <input id="productSearch" placeholder="Buscar producto..." oninput="renderProducts()">
                 </div>
                 <div class="table-wrap">
                     <table>
@@ -373,13 +398,13 @@
 
         <!-- ===== MOVIMIENTOS ===== -->
         <section id="movimientos" class="view">
-            <h2><i class="fas fa-history"></i> Historial de Movimientos</h2>
+            <h2><i class="fas fa-history"></i> Movimientos</h2>
             <div class="panel">
                 <div class="table-wrap">
                     <table>
                         <thead>
                             <tr>
-                                <th>Fecha y hora</th>
+                                <th>Fecha</th>
                                 <th>Producto</th>
                                 <th>Cantidad</th>
                                 <th>Total</th>
@@ -392,68 +417,45 @@
             </div>
         </section>
 
-        <!-- ===== CONFIGURACIÓN & SYNC ===== -->
+        <!-- ===== SYNC ===== -->
         <section id="sync" class="view">
-            <h2><i class="fas fa-cog"></i> Configuración y Sincronización</h2>
+            <h2><i class="fas fa-sync"></i> Sincronizar</h2>
 
-            <!-- AUTORIZACIÓN DE GMAIL -->
             <div class="panel">
-                <h3><i class="fas fa-users-cog"></i> Cuentas de Gmail autorizadas</h3>
-                <p style="font-size:12px;color:var(--l);margin-bottom:12px;">
-                    Solo las cuentas de Gmail agregadas en esta lista podrán iniciar sesión en el sistema. Podés agregar o quitar correos autorizados en cualquier momento.
-                </p>
-                <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;">
-                    <input id="newAuthEmail" type="email" placeholder="usuario@gmail.com" style="flex:1;min-width:200px;">
-                    <button class="btn btn-primary" onclick="addEmailFromUI()">
-                        <i class="fas fa-user-plus"></i> Autorizar Gmail
-                    </button>
-                </div>
-                <div id="authorizedEmailsList" class="auth-emails-list">
-                    <!-- Lista de emails autorizados -->
-                </div>
-            </div>
-
-            <!-- GITHUB & DEPLOYS -->
-            <div class="panel">
-                <h3><i class="fab fa-github"></i> Conexión con GitHub & Deploys automáticos</h3>
-                <div style="font-size:12px;color:var(--l);margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                    <span class="badge badge-success"><i class="fas fa-check-circle"></i> Repositorio configurado</span>
-                    <strong>kioscoa220munro/a220</strong>
-                </div>
+                <h3><i class="fas fa-github"></i> Configuración</h3>
                 <div class="form-group">
                     <label>Usuario GitHub</label>
                     <input id="githubUser" placeholder="tu-usuario" value="kioscoa220munro">
                 </div>
                 <div class="form-group">
                     <label>Repositorio</label>
-                    <input id="githubRepo" placeholder="a220" value="a220">
+                    <input id="githubRepo" placeholder="a220-data" value="a220-data">
                 </div>
                 <div class="form-group">
-                    <label>Personal Access Token (GitHub Token)</label>
+                    <label>Token</label>
                     <input id="githubToken" placeholder="ghp_xxxxx" type="password">
                 </div>
                 <div class="form-group">
-                    <label>Email para reportes y avisos</label>
-                    <input id="emailReporte" placeholder="kiosco.a220@gmail.com">
+                    <label>Email para enviar reportes</label>
+                    <input id="emailReporte" placeholder="tucorreo@gmail.com">
                 </div>
                 <button class="btn btn-primary btn-block" onclick="saveConfig()">
                     <i class="fas fa-save"></i> Guardar configuración
                 </button>
             </div>
 
-            <!-- ACCIONES DE SINCRONIZACIÓN -->
             <div class="panel">
-                <h3><i class="fas fa-arrows-rotate"></i> Sincronización en la nube</h3>
+                <h3><i class="fas fa-arrows-rotate"></i> Acciones</h3>
                 <div style="display:flex;gap:8px;flex-wrap:wrap;">
                     <button class="btn btn-success" onclick="syncToGitHub()">
-                        <i class="fas fa-upload"></i> Subir copia a GitHub
+                        <i class="fas fa-upload"></i> Subir
                     </button>
                     <button class="btn btn-info" onclick="syncFromGitHub()">
-                        <i class="fas fa-download"></i> Descargar copia de GitHub
+                        <i class="fas fa-download"></i> Descargar
                     </button>
                 </div>
                 <div id="syncLog" style="margin-top:12px;font-size:12px;color:var(--l);border-top:1px solid var(--e);padding-top:10px;max-height:150px;overflow-y:auto;">
-                    <div>📡 Listo para sincronizar con GitHub</div>
+                    <div>📡 Listo para sincronizar</div>
                 </div>
             </div>
         </section>
@@ -461,12 +463,12 @@
     </main>
 
     <div class="app-footer">
-        A <strong>220</strong> Pro v2.0 · Sistema de Gestión de Kiosco
+        A <strong>220</strong> Pro v2.0 · Gestión de Kiosco
     </div>
 
     <script src="js/config.js"></script>
+    <script src="js/app.js"></script>
     <script src="js/scanner.js"></script>
     <script src="js/github.js"></script>
-    <script src="js/app.js"></script>
 </body>
 </html>
