@@ -246,7 +246,7 @@ function mostrarAnalisis() {
 }
 
 // ============================================
-// BUSCADOR DE PRODUCTOS (NUEVO)
+// BUSCADOR DE PRODUCTOS
 // ============================================
 
 function filtrarProductos() {
