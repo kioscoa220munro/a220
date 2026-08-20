@@ -1,5 +1,5 @@
 // ============================================
-// APP PRINCIPAL A220 PRO
+// APP PRINCIPAL
 // ============================================
 
 let data = { products: [], sales: [], moves: [], scans: [] };
@@ -8,6 +8,7 @@ let currentQty = 1;
 let isLoggedIn = false;
 let currentUser = null;
 let emailReporte = '';
+let productosFiltrados = [];
 
 // ============================================
 // LOGIN CON GMAIL
@@ -17,18 +18,17 @@ function loginConGmail() {
     const error = document.getElementById('loginError');
     error.textContent = '';
 
-    if (!GOOGLE_CLIENT_ID || GOOGLE_CLIENT_ID === 'TU_CLIENT_ID_DE_GOOGLE.apps.googleusercontent.com') {
+    if (GOOGLE_CLIENT_ID === 'TU_CLIENT_ID_DE_GOOGLE.apps.googleusercontent.com') {
         error.textContent = '❌ Configurá el CLIENT ID de Google en config.js';
         return;
     }
 
-    const authorized = getAuthorizedEmails();
-    if (!authorized || authorized.length === 0) {
-        error.textContent = '❌ No hay cuentas autorizadas configuradas';
+    if (EMAIL_AUTORIZADO === 'tucorreo@gmail.com') {
+        error.textContent = '❌ Configurá tu EMAIL AUTORIZADO en config.js';
         return;
     }
 
-    if (typeof google !== 'undefined' && google.accounts && google.accounts.id) {
+    if (typeof google !== 'undefined') {
         google.accounts.id.initialize({
             client_id: GOOGLE_CLIENT_ID,
             callback: handleCredentialResponse,
@@ -48,21 +48,16 @@ function handleCredentialResponse(response) {
         const foto = payload.picture;
 
         if (!email) {
-            document.getElementById('loginError').textContent = '❌ No se pudo obtener el email de la cuenta';
+            document.getElementById('loginError').textContent = '❌ No se pudo obtener el email';
             return;
         }
 
-        // VERIFICAR QUE EL EMAIL ESTÉ AUTORIZADO
-        if (!isEmailAuthorized(email)) {
-            document.getElementById('loginError').innerHTML = `
-                ❌ Acceso denegado.<br>
-                <span style="font-size:12px;">El email <strong>${email}</strong> no está en la lista de autorizados.</span>
-            `;
+        if (email !== EMAIL_AUTORIZADO) {
+            document.getElementById('loginError').textContent = '❌ Acceso denegado. Email no autorizado.';
             return;
         }
 
-        // ✅ ACCESO CONCEDIDO
-        currentUser = email.toLowerCase().trim();
+        currentUser = email;
         isLoggedIn = true;
 
         document.getElementById('userDisplay').textContent = nombre || email;
@@ -73,12 +68,11 @@ function handleCredentialResponse(response) {
 
         document.getElementById('loginOverlay').classList.add('hidden');
         loadData();
-        loadGitHubConfig();
         renderAll();
         showToast('✅ ¡Bienvenido ' + (nombre || email) + '!', 'success');
 
     } catch (e) {
-        document.getElementById('loginError').textContent = '❌ Error al procesar el inicio de sesión';
+        document.getElementById('loginError').textContent = '❌ Error al procesar el login';
         console.error(e);
     }
 }
@@ -96,7 +90,7 @@ function doLogout() {
 }
 
 // ============================================
-// DATA Y PERSISTENCIA
+// DATA
 // ============================================
 
 function loadData() {
@@ -115,7 +109,6 @@ function loadData() {
             data.moves = [];
             data.scans = [];
         }
-
         const emailSaved = localStorage.getItem('a220_email_reporte');
         if (emailSaved) {
             emailReporte = emailSaved;
@@ -144,74 +137,9 @@ function saveConfig() {
     if (email) {
         emailReporte = email;
         localStorage.setItem('a220_email_reporte', email);
+        showToast('✅ Email guardado: ' + email, 'success');
     }
     saveGitHubConfig();
-    showToast('✅ Configuración guardada', 'success');
-}
-
-// ============================================
-// GESTIÓN DE CUENTAS GMAIL AUTORIZADAS (UI)
-// ============================================
-
-function renderAuthorizedEmails() {
-    const container = document.getElementById('authorizedEmailsList');
-    if (!container) return;
-
-    const emails = getAuthorizedEmails();
-    if (emails.length === 0) {
-        container.innerHTML = '<div style="color:var(--l);font-size:13px;padding:8px 0;">No hay cuentas registradas.</div>';
-        return;
-    }
-
-    container.innerHTML = emails.map(email => {
-        const isCurrent = currentUser && currentUser.toLowerCase() === email.toLowerCase();
-        return `
-            <div class="auth-email-item">
-                <div class="auth-email-info">
-                    <i class="fab fa-google" style="color:#ea4335;"></i>
-                    <span class="auth-email-text">${email}</span>
-                    ${isCurrent ? '<span class="badge badge-success" style="font-size:10px;">Tú (Admin)</span>' : ''}
-                </div>
-                <div>
-                    <button class="btn btn-danger btn-xs" onclick="removeEmailFromUI('${email}')" ${emails.length <= 1 || isCurrent ? 'title="No se puede eliminar la cuenta activa o la única cuenta autorizada"' : ''}>
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-function addEmailFromUI() {
-    const input = document.getElementById('newAuthEmail');
-    if (!input) return;
-    const email = input.value.trim();
-
-    if (!email) {
-        showToast('⚠️ Escribí un correo de Gmail', 'error');
-        return;
-    }
-
-    const res = addAuthorizedEmail(email);
-    if (res.success) {
-        input.value = '';
-        renderAuthorizedEmails();
-        showToast('✅ ' + res.message, 'success');
-    } else {
-        showToast('⚠️ ' + res.message, 'error');
-    }
-}
-
-function removeEmailFromUI(email) {
-    if (!confirm(`¿Eliminar ${email} de las cuentas autorizadas?`)) return;
-
-    const res = removeAuthorizedEmail(email, currentUser);
-    if (res.success) {
-        renderAuthorizedEmails();
-        showToast('✅ ' + res.message, 'success');
-    } else {
-        showToast('⚠️ ' + res.message, 'error');
-    }
 }
 
 // ============================================
@@ -318,6 +246,74 @@ function mostrarAnalisis() {
 }
 
 // ============================================
+// BUSCADOR DE PRODUCTOS (NUEVO)
+// ============================================
+
+function filtrarProductos() {
+    const input = document.getElementById('buscarProducto');
+    const lista = document.getElementById('listaProductos');
+    const texto = input.value.toLowerCase().trim();
+
+    if (texto.length === 0) {
+        lista.style.display = 'none';
+        return;
+    }
+
+    productosFiltrados = data.products.filter(p =>
+        p.name.toLowerCase().includes(texto) ||
+        (p.barcode && p.barcode.includes(texto))
+    );
+
+    if (productosFiltrados.length === 0) {
+        lista.innerHTML = '<div style="padding:10px;color:var(--l);text-align:center;">❌ No se encontraron productos</div>';
+        lista.style.display = 'block';
+        return;
+    }
+
+    lista.innerHTML = productosFiltrados.map(p => `
+        <div onclick="seleccionarProducto(${p.id})" style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--e);display:flex;justify-content:space-between;align-items:center;transition:0.2s;">
+            <div>
+                <strong>${p.name}</strong>
+                <div style="font-size:12px;color:var(--l);">${p.cat} · Stock: ${p.stock}</div>
+                <div style="font-size:10px;color:var(--l);">Código: ${p.barcode || '—'}</div>
+            </div>
+            <div style="font-weight:800;color:var(--a);">${money(p.price)}</div>
+        </div>
+    `).join('');
+
+    lista.style.display = 'block';
+}
+
+function seleccionarProducto(id) {
+    const product = data.products.find(p => p.id === id);
+    if (!product) return;
+
+    document.getElementById('listaProductos').style.display = 'none';
+    document.getElementById('buscarProducto').value = product.name;
+    document.getElementById('saleProduct').value = product.id;
+
+    updatePreview();
+    setPrice();
+
+    currentQty = 1;
+    document.getElementById('qtyDisplay').textContent = '1';
+    document.getElementById('saleQty').value = '1';
+
+    showToast('✅ ' + product.name + ' seleccionado', 'success');
+}
+
+// Cerrar lista al hacer clic fuera
+document.addEventListener('click', function(e) {
+    const lista = document.getElementById('listaProductos');
+    const input = document.getElementById('buscarProducto');
+    if (lista && input) {
+        if (e.target !== lista && e.target !== input) {
+            lista.style.display = 'none';
+        }
+    }
+});
+
+// ============================================
 // PRODUCTOS
 // ============================================
 
@@ -336,13 +332,14 @@ function renderProducts() {
             <td><span class="badge badge-info">${p.cat}</span></td>
             <td>${money(p.price)}</td>
             <td class="${p.stock <= p.minStock ? 'stock-low' : 'stock-ok'}">${p.stock}</td>
+            <td><span class="barcode-badge">${p.barcode || '—'}</span></td>
             <td>
                 <button class="btn btn-accent btn-xs" onclick="quickSell(${p.id})"><i class="fas fa-cart-plus"></i></button>
                 <button class="btn btn-primary btn-xs" onclick="editProduct(${p.id})"><i class="fas fa-edit"></i></button>
                 <button class="btn btn-danger btn-xs" onclick="deleteProduct(${p.id})"><i class="fas fa-trash"></i></button>
             </td>
         </tr>
-    `).join('') || '<tr><td colspan="6" style="text-align:center;color:var(--l);">No hay productos</td></tr>';
+    `).join('') || '<tr><td colspan="7" style="text-align:center;color:var(--l);">No hay productos</td></tr>';
 
     renderSelect();
     updatePreview();
@@ -364,9 +361,7 @@ function setPrice() {
 }
 
 function updatePreview() {
-    const sel = document.getElementById('saleProduct');
-    if (!sel) return;
-    const id = parseInt(sel.value);
+    const id = parseInt(document.getElementById('saleProduct').value);
     const p = data.products.find(x => x.id === id);
     const preview = document.getElementById('productPreview');
     if (!preview) return;
@@ -385,6 +380,17 @@ function updatePreview() {
         document.getElementById('previewStock').textContent = 'Stock: 0';
         document.getElementById('productImage').innerHTML = '<i class="fas fa-cube"></i>';
     }
+}
+
+document.getElementById('saleProduct').onchange = function() {
+    setPrice();
+    updatePreview();
+};
+
+function adjustQty(delta) {
+    currentQty = Math.max(1, currentQty + delta);
+    document.getElementById('qtyDisplay').textContent = currentQty;
+    document.getElementById('saleQty').value = currentQty;
 }
 
 // ============================================
@@ -418,8 +424,8 @@ function addProduct() {
     const barcode = document.getElementById('pBarcode').value.trim();
     const image = document.getElementById('pImage').value.trim();
 
-    if (!name || isNaN(price) || isNaN(stock) || price < 0 || stock < 0) {
-        showToast('Completá los datos correctamente', 'error');
+    if (!name || price < 0 || stock < 0) {
+        showToast('Completá los datos', 'error');
         return;
     }
 
@@ -457,7 +463,7 @@ function editProduct(id) {
     const barcode = prompt('Código de barras:', p.barcode || '');
 
     if (isNaN(price) || isNaN(stock) || isNaN(minStock)) {
-        showToast('Valores numéricos inválidos', 'error');
+        showToast('Valores inválidos', 'error');
         return;
     }
 
@@ -546,7 +552,7 @@ function calcularVuelto() {
 
 function finishSale() {
     if (!cart.length) {
-        showToast('No hay productos en el carrito', 'error');
+        showToast('No hay productos', 'error');
         return;
     }
 
@@ -594,38 +600,38 @@ function finishSale() {
 // ============================================
 
 function enviarResumenVenta() {
-    if (!data.sales || data.sales.length === 0) {
-        showToast('No hay ventas registradas para enviar', 'error');
+    if (!cart.length) {
+        showToast('No hay venta para enviar', 'error');
         return;
     }
 
-    const ultimaVenta = data.sales[0];
-    const items = (ultimaVenta.items || []).map(i => `${i.name} x${i.qty} = ${money(i.total)}`).join('\n');
-    const cliente = ultimaVenta.cliente || 'Sin cliente';
+    const total = cart.reduce((a, i) => a + i.total, 0);
+    const items = cart.map(i => `${i.name} x${i.qty} = ${money(i.total)}`).join('\n');
+    const cliente = document.getElementById('clienteNombre').value.trim() || 'Sin cliente';
 
     const mensaje = `
-📋 RESUMEN DE VENTA - A220 PRO
-📅 ${ultimaVenta.date}
+📋 RESUMEN DE VENTA
+📅 ${dateTimeStr()}
 👤 Cliente: ${cliente}
 
 🛒 Productos:
 ${items}
 
-💰 Total: ${money(ultimaVenta.total)}
+💰 Total: ${money(total)}
 
-✅ Registrado por: ${currentUser || 'Admin'}
+✅ Venta registrada en A220 Pro
     `;
 
     const email = emailReporte || '';
     if (!email) {
-        showToast('📧 Configurá un email en Configuración', 'info');
+        showToast('📧 Configurá un email en Sincronizar', 'info');
         return;
     }
 
-    const subject = encodeURIComponent('📋 Resumen de venta - A220 Pro');
+    const subject = encodeURIComponent('📋 Resumen de venta - A220');
     const body = encodeURIComponent(mensaje);
     window.open(`mailto:${email}?subject=${subject}&body=${body}`);
-    showToast('📧 Abriendo cliente de email...', 'success');
+    showToast('📧 Abriendo email para enviar', 'success');
 }
 
 function quickSell(id) {
@@ -666,7 +672,7 @@ function renderMoves() {
 }
 
 // ============================================
-// RENDER GENERAL
+// RENDER TODO
 // ============================================
 
 function renderAll() {
@@ -675,11 +681,10 @@ function renderAll() {
     renderProducts();
     renderCart();
     renderMoves();
-    renderAuthorizedEmails();
 }
 
 // ============================================
-// TEMA DARK / LIGHT
+// TEMA
 // ============================================
 
 let darkMode = localStorage.getItem('a220_theme') === 'dark';
@@ -695,7 +700,7 @@ function toggleTheme() {
 }
 
 // ============================================
-// NOTIFICACIONES TOAST
+// TOAST
 // ============================================
 
 function showToast(msg, type) {
@@ -706,47 +711,21 @@ function showToast(msg, type) {
     t.className = 'toast ' + (type || 'info');
     t.innerHTML = '<i class="fas ' + (icons[type] || icons.info) + '"></i> ' + msg;
     c.appendChild(t);
-    setTimeout(() => { 
-        t.style.opacity = '0';
-        setTimeout(() => t.remove(), 300); 
-    }, 3000);
+    setTimeout(() => { t.style.opacity = '0';
+        setTimeout(() => t.remove(), 300); }, 3000);
 }
 
 // ============================================
-// INICIALIZACIÓN
+// INICIO
 // ============================================
 
-document.addEventListener('DOMContentLoaded', () => {
-    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
-    const clockEl = document.getElementById('clock');
-    if (clockEl) clockEl.textContent = dateTimeStr();
+document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+document.getElementById('clock').textContent = dateTimeStr();
 
-    setInterval(() => {
-        const c = document.getElementById('clock');
-        if (c) c.textContent = dateTimeStr();
-    }, 1000);
+setInterval(() => {
+    document.getElementById('clock').textContent = dateTimeStr();
+}, 1000);
 
-    const saleProductEl = document.getElementById('saleProduct');
-    if (saleProductEl) {
-        saleProductEl.onchange = function() {
-            setPrice();
-            updatePreview();
-        };
-    }
-
-    // Permitir enviar nuevo email autorizado con Enter
-    const newAuthInput = document.getElementById('newAuthEmail');
-    if (newAuthInput) {
-        newAuthInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                addEmailFromUI();
-            }
-        });
-    }
-
-    // Inicializar emails por defecto si es primera vez
-    const authList = getAuthorizedEmails();
-    console.log('🚀 A220 Pro v2.0 Iniciado');
-    console.log('📧 Cuentas autorizadas:', authList.length, authList);
-});
+console.log('🚀 A220 Pro v2.0');
+console.log('📧 Email autorizado:', EMAIL_AUTORIZADO);
+console.log('🔑 Google Client ID:', GOOGLE_CLIENT_ID.substring(0, 10) + '...');
