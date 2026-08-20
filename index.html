@@ -6,8 +6,10 @@
     <title>A220 Pro | Gestión</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
-    <script src="https://accounts.google.com/gsi/client"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js">
+    </script>
+    <script src="https://accounts.google.com/gsi/client">
+    </script>
     <style>
         .image-upload {
             border: 2px dashed var(--e);
@@ -20,7 +22,7 @@
         }
         .image-upload:hover {
             border-color: var(--a);
-            background: rgba(245,158,11,0.05);
+            background: rgba(245, 158, 11, 0.05);
         }
         .image-upload img {
             max-width: 100px;
@@ -56,7 +58,7 @@
             transition: 0.2s;
         }
         #listaProductos div:hover {
-            background: rgba(245,158,11,0.1);
+            background: rgba(245, 158, 11, 0.1);
         }
         .buscador-wrapper {
             position: relative;
@@ -122,7 +124,8 @@
         </div>
         <div class="header-right">
             <div id="clock"></div>
-            <span style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.08);padding:3px 12px;border-radius:20px;">
+            <span
+                style="display:flex;align-items:center;gap:6px;background:rgba(255,255,255,0.08);padding:3px 12px;border-radius:20px;">
                 <img id="userAvatar" src="" style="width:24px;height:24px;border-radius:50%;display:none;">
                 <span id="userDisplay" style="font-size:12px;color:#cbd5e1;"></span>
             </span>
@@ -226,10 +229,16 @@
                 <div class="form-group">
                     <label>Buscar producto</label>
                     <div class="buscador-wrapper">
-                        <input type="text" id="buscarProducto" placeholder="Escribí el nombre o código..." oninput="filtrarProductos()" style="width:100%;padding:10px 12px;border:2px solid var(--e);border-radius:var(--s);font-size:14px;background:var(--b);color:var(--t);">
+                        <input type="text" id="buscarProducto"
+                            placeholder="Escribí el nombre o código..."
+                            oninput="filtrarProductos()"
+                            style="width:100%;padding:10px 12px;border:2px solid var(--e);border-radius:var(--s);font-size:14px;background:var(--b);color:var(--t);">
                         <div id="listaProductos" style="display:none;"></div>
                     </div>
                 </div>
+
+                <!-- Select oculto para mantener el id -->
+                <select id="saleProduct" style="display:none;"></select>
 
                 <div class="product-preview" id="productPreview">
                     <div class="product-image" id="productImage">
@@ -354,7 +363,8 @@
                     <label>Código de barras</label>
                     <div style="display:flex;gap:6px;">
                         <input id="pBarcode" placeholder="Ej. 7791234567890" style="flex:1;">
-                        <button class="btn btn-outline btn-sm" onclick="document.getElementById('pBarcode').value='BAR'+Date.now().toString().slice(-8)">
+                        <button class="btn btn-outline btn-sm"
+                            onclick="document.getElementById('pBarcode').value='BAR'+Date.now().toString().slice(-8)">
                             <i class="fas fa-random"></i>
                         </button>
                     </div>
@@ -365,9 +375,11 @@
                     <div class="image-upload" onclick="document.getElementById('pImageInput').click()">
                         <i class="fas fa-cloud-upload-alt" style="font-size:24px;color:var(--a);"></i>
                         <div style="margin-top:5px;">Tocá para seleccionar imagen</div>
-                        <img id="pImagePreview" style="display:none;max-width:100px;max-height:100px;border-radius:var(--s);margin-top:10px;">
+                        <img id="pImagePreview"
+                            style="display:none;max-width:100px;max-height:100px;border-radius:var(--s);margin-top:10px;">
                     </div>
-                    <input id="pImageInput" type="file" accept="image/*" style="display:none" onchange="previewImage(event)">
+                    <input id="pImageInput" type="file" accept="image/*" style="display:none"
+                        onchange="previewImage(event)">
                     <input id="pImage" type="hidden">
                 </div>
 
@@ -458,7 +470,8 @@
                         <i class="fas fa-download"></i> Descargar
                     </button>
                 </div>
-                <div id="syncLog" style="margin-top:12px;font-size:12px;color:var(--l);border-top:1px solid var(--e);padding-top:10px;max-height:150px;overflow-y:auto;">
+                <div id="syncLog"
+                    style="margin-top:12px;font-size:12px;color:var(--l);border-top:1px solid var(--e);padding-top:10px;max-height:150px;overflow-y:auto;">
                     <div>📡 Listo para sincronizar</div>
                 </div>
             </div>
@@ -470,9 +483,13 @@
         A <strong>220</strong> Pro v2.0 · Gestión de Kiosco
     </div>
 
-    <script src="js/config.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/scanner.js"></script>
-    <script src="js/github.js"></script>
+    <script src="js/config.js">
+    </script>
+    <script src="js/app.js">
+    </script>
+    <script src="js/scanner.js">
+    </script>
+    <script src="js/github.js">
+    </script>
 </body>
 </html>
