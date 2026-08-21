@@ -18,7 +18,7 @@ function loginConGmail() {
     const error = document.getElementById('loginError');
     error.textContent = '';
 
-    if (GOOGLE_CLIENT_ID === 'TU_CLIENT_ID_DE_GOOGLE.apps.googleusercontent.com') {
+    if (GOOGLE_CLIENT_ID === 'AIzaSyCmvtNda_bxJw8KTTHbu7zYJyx5mu8lCNQ') {
         error.textContent = '❌ Configurá el CLIENT ID de Google en config.js';
         return;
     }
