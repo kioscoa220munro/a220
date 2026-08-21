@@ -18,7 +18,7 @@ function loginConGmail() {
     const error = document.getElementById('loginError');
     error.textContent = '';
 
-    if (GOOGLE_CLIENT_ID === 'AIzaSyCmvtNda_bxJw8KTTHbu7zYJyx5mu8lCNQ') {
+    if (GOOGLE_CLIENT_ID === 'firebase-adminsdk-fbsvc@studio-320065319-58345.iam.gserviceaccount.com') {
         error.textContent = '❌ Configurá el CLIENT ID de Google en config.js';
         return;
     }
