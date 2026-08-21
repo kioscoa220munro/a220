@@ -2,8 +2,8 @@
 // CONFIGURACIÓN
 // ============================================
 
-const EMAIL_AUTORIZADO = 'kiosco.a220munro@gmail.com';
-const GOOGLE_CLIENT_ID = '939192749315-5ck217res1qimgf25dngs60hc27j1c3q.apps.googleusercontent.com';
+const EMAIL_AUTORIZADO = 'kioscoa220munro@gmail.com';
+const GOOGLE_CLIENT_ID = 'TU_CLIENT_ID_AQUI';
 const STORAGE_KEY = 'a220_pro_data';
 
 // ============================================
