@@ -5,7 +5,6 @@
 // ============================================
 // CONFIGURACIÓN INTERNA (no necesita config.js)
 // ============================================
-location.reload(true)
 // 📧 TU EMAIL AUTORIZADO (CAMBIALO ACA)
 const EMAIL_AUTORIZADO = 'kiosco.a220@gmail.com';
 
