@@ -3,7 +3,7 @@
 // ============================================
 
 const EMAIL_AUTORIZADO = 'kioscoa220munro@gmail.com';
-const GOOGLE_CLIENT_ID = 'TU_CLIENT_ID_AQUI';
+const GOOGLE_CLIENT_ID = '939192749315-h4pe4703p2pmne96kh6masaale7gu0tu.apps.googleusercontent.com';
 const STORAGE_KEY = 'a220_pro_data';
 
 // ============================================
