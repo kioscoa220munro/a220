@@ -10,7 +10,7 @@
 const EMAIL_AUTORIZADO = 'kiosco.a220@gmail.com';
 
 // 🔑 CLIENTE ID DE GOOGLE (CAMBIALO ACA)
-const GOOGLE_CLIENT_ID = 'firebase-adminsdk-fbsvc@studio-320065319-58345.iam.gserviceaccount.com';
+const GOOGLE_CLIENT_ID = '939192749315-h4pe4703p2pmne96kh6masaale7gu0tu.apps.googleusercontent.com';
 
 // 📦 CLAVE PARA LOCALSTORAGE
 const STORAGE_KEY = 'a220_pro_data';
